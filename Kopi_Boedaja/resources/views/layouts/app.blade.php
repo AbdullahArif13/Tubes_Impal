@@ -1,30 +1,22 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>@yield('title', 'Aplikasi Saya')</title>
-
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    
-    @stack('styles')
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kopi Boedaja</title>
+  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
 
-    <nav class="navbar-global">
-        <div class="navbar-container">
-            <a href="/" class="navbar-brand">NamaAplikasi</a>
-            <div class="navbar-links">
-                <a href="/login">Login</a>
-                <a href="/register">Register</a>
-            </div>
-        </div>
-    </nav>
-    <main class="main-content">
-        @yield('content')
-    </main>
-    
+<body class="min-h-screen flex flex-col bg-gray-50">
+  <div class="flex-grow">
+    @yield('content')
+  </div>
 
-    </body>
+  {{-- Bottom Navigation --}}
+  @php
+    $cartCount = session('cartCount', 0);
+  @endphp
+  @include('components.bottom-navigation', ['cartCount' => $cartCount])
+</body>
 </html>

@@ -2,13 +2,20 @@
 
 use Illuminate\Support\Facades\Route;
 
-// ... (mungkin ada route lain seperti route '/_')
+// Halaman utama → redirect ke menu
+Route::get('/', fn() => redirect()->route('menu'));
 
-// Ini adalah route untuk halaman login Anda
-Route::get('/login', function () {
-    // 'login' di sini mengacu ke file:
-    // resources/views/login.blade.php
-    return view('login'); 
-});
+// Halaman Menu
+Route::get('/menu', fn() => view('pages.menu'))->name('menu');
 
-// (Nanti kita akan tambahkan route register di sini)
+// Halaman Cart
+Route::get('/cart', fn() => view('pages.cart'))->name('cart');
+
+// Halaman Profil
+Route::get('/profile', fn() => view('pages.profile'))->name('profile');
+
+// Halaman Payment
+Route::get('/payment', fn() => view('pages.payment'))->name('payment');
+
+// Halaman Order Confirmation
+Route::get('/order-confirmation', fn() => view('pages.order-confirmation'))->name('order.confirmation');
