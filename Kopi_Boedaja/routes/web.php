@@ -2,20 +2,28 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Halaman utama → redirect ke menu
-Route::get('/', fn() => redirect()->route('menu'));
+// 1. Halaman Menu
+Route::get('/', function () {
+    return view('menu'); // menu.blade.php
+})->name('menu');
 
-// Halaman Menu
-Route::get('/menu', fn() => view('pages.menu'))->name('menu');
+// 2. Halaman Rincian Pesanan
+Route::get('/RincianPesanan', function () {
+    return view('RincianPesanan'); // rincian-pesanan.blade.php
+})->name('RincianPesanan');
 
-// Halaman Cart
-Route::get('/cart', fn() => view('pages.cart'))->name('cart');
+// 3. Halaman Rincian Pembayaran
+Route::get('/RincianPembayaran', function () {
+    return view('RincianPembayaran'); // RincianPembayaran.blade.php
+})->name('RincianPembayaran');
 
-// Halaman Profil
-Route::get('/profile', fn() => view('pages.profile'))->name('profile');
+// 4. Halaman Pembayaran Final (GET)
+Route::get('/Pembayaran', function () {
+    return view('Pembayaran');
+})->name('Pembayaran');
 
-// Halaman Payment
-Route::get('/payment', fn() => view('pages.payment'))->name('payment');
+// 5. Proses submit pembayaran (POST)
+Route::post('/Pembayaran', function () {
+    return view('Pembayaran');
+})->name('Pembayaran.submit');
 
-// Halaman Order Confirmation
-Route::get('/order-confirmation', fn() => view('pages.order-confirmation'))->name('order.confirmation');
