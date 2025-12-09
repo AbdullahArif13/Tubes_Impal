@@ -20,9 +20,9 @@
         <div class="w-8"></div>
     </div>
 
-    <form action="{{ route('Pembayaran.submit') }}" method="POST" class="px-4 sm:px-6 lg:px-8 py-6 max-w-2xl mx-auto">
+    <form action="{{ route('pesanan.store') }}" method="POST" class="px-4 sm:px-6 lg:px-8 py-6 max-w-2xl mx-auto">
         @csrf
-        
+        <input type="hidden" name="cart" id="cart-input">            
         <!-- Tipe Pemesanan -->
         <div class="bg-white rounded-lg border border-gray-300 px-4 sm:px-5 py-3 mb-6 flex items-center justify-between gap-4">
             <span class="font-semibold text-gray-700 text-sm sm:text-base">Tipe Pemesanan</span>
@@ -46,7 +46,7 @@
                 <div class="flex items-center gap-3 bg-gray-100 rounded-lg px-4 py-3 border border-gray-300">
                     <input 
                         type="text" 
-                        name="fullName" 
+                        name="nama" 
                         placeholder="Hanif Haidar"
                         class="bg-transparent flex-1 outline-none text-sm sm:text-base text-gray-800"
                         required
@@ -62,7 +62,7 @@
                 <div class="flex items-center gap-3 bg-gray-100 rounded-lg px-4 py-3 border border-gray-300">
                     <input 
                         type="tel" 
-                        name="phone"
+                        name="nomor_ponsel"
                         placeholder="0812-3456-7890"
                         class="bg-transparent flex-1 outline-none text-sm sm:text-base text-gray-800"
                         required
@@ -93,7 +93,7 @@
                 <div class="flex items-center gap-3 bg-gray-100 rounded-lg px-4 py-3 border border-gray-300">
                     <input 
                         type="text" 
-                        name="tableNumber"
+                        name="nomor_meja"
                         placeholder="Lantai 1 - 28"
                         class="bg-transparent flex-1 outline-none text-sm sm:text-base text-gray-800"
                         required
@@ -119,5 +119,21 @@
         </div>
 
     </form>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cartInput = document.getElementById('cart-input');
+        if (!cartInput) return;
+
+        const cart = localStorage.getItem('cart');
+        if (cart) {
+            cartInput.value = cart;
+            // optional: console.log(cart) untuk ngecek
+        } else {
+            console.warn('Cart tidak ditemukan di localStorage');
+        }
+    });
+    </script>
+
 </body>
 </html>

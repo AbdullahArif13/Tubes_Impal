@@ -15,19 +15,58 @@
 
   <!-- TOP BUTTONS -->
   <div class="bg-gray-100 sticky top-0 z-50 px-4 py-3 flex justify-end gap-3 w-full">
-    <button class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:shadow-lg">
-      <i data-lucide="search" class="w-5 h-5"></i>
+    <button class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:shadow-lg"> 
+      <i data-lucide="search" class="w-5 h-5"></i> 
     </button>
-    <button class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:shadow-lg">
+    <button id="open-sidebar"
+            class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:shadow-lg">
       <i data-lucide="menu" class="w-5 h-5"></i>
     </button>
   </div>
+  
+    <!-- OVERLAY -->
+  <div id="sidebar-backdrop"
+       class="fixed inset-0 bg-black/40 z-40 hidden"></div>
+
+  <!-- SIDEBAR -->
+  <div id="sidebar"
+       class="fixed inset-y-0 right-0 w-72 bg-white shadow-xl transform translate-x-full
+              transition-transform duration-300 z-50 flex flex-col">
+
+    <!-- HEADER SIDEBAR -->
+    <div class="p-4 border-b flex items-center justify-between">
+      <h3 class="font-bold text-lg">Menu</h3>
+      <button id="close-sidebar"
+              class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- BODY SIDEBAR -->
+    <div class="p-4 flex flex-col gap-3">
+      <a href="{{ route('login') }}"
+         class="w-full py-2 px-3 rounded-lg border font-semibold text-left hover:bg-gray-50">
+        Login
+      </a>
+
+      <a href="{{ route('register') }}"
+         class="w-full py-2 px-3 rounded-lg border font-semibold text-left hover:bg-gray-50">
+        Sign Up
+      </a>
+
+      <a href="{{ route('promo.index') }}"
+         class="w-full py-2 px-3 rounded-lg border font-semibold text-left hover:bg-gray-50">
+        Lihat Promo
+      </a>
+    </div>
+  </div>
+
 
   <div class="px-4 pt-6 max-w-7xl mx-auto">
 
     <!-- HEADER IMAGE -->
     <div class="w-full h-40 rounded-lg overflow-hidden mb-6 bg-gray-300">
-      <img src="/cozy-coffee-shop.png" class="w-full h-full object-cover" />
+      <img src="/cozy-coffee-shop.jpg" class="w-full h-full object-cover" />
     </div>
 
     <!-- STORE INFO -->
@@ -38,11 +77,6 @@
         <div class="text-center w-full pr-12">
           <h2 class="text-lg font-bold truncate">KOPI BOEDAJA</h2>
           <p class="text-gray-600 text-xs">Buka hari ini 00.00 - 23.59</p>
-        </div>
-
-        <!-- ICON RIGHT -->
-        <div class="absolute right-4 top-1/2 -translate-y-1/2">
-          <i data-lucide="chevron-right" class="w-6 h-6"></i>
         </div>
       </div>
     </div>
@@ -109,10 +143,26 @@
   <script>
     lucide.createIcons();
 
-    const products = [
-      { id: "1", name: "HOT COFFEE AREN", price: 23000, image: "/hot-coffee-latte-art.jpg" },
-      { id: "2", name: "Nama Menu", price: 23000, image: "/coffee-menu.jpg" },
-    ];
+    // === PRODUCTS dari database (dikirim oleh controller sebagai $menus) ===
+    // Format: [{id, name, price, image, kategori}, ...]
+    // asset('storage/...') dibuat di server sehingga path absolute benar
+    const products = {!! json_encode(
+        $menus->map(function($m){
+            return [
+              'id' => (string)$m->id,
+              'name' => $m->nama,
+              'price' => (int)$m->harga,
+              // asumsi gambarnya ada di storage/app/public/menus/
+              'image' => $m->gambar_produk ? asset('storage/menus/'.$m->gambar_produk) : asset('images/placeholder.png'),
+              'kategori' => $m->kategori ?? null
+            ];
+        })
+    ) !!};
+
+    // jika produk kosong, tampilkan pesan
+    if (!products || products.length === 0) {
+      document.getElementById('product-list').innerHTML = '<p class="text-gray-500">Tidak ada menu tersedia.</p>';
+    }
 
     let cart = {};
     let activeTab = "hot";
@@ -127,24 +177,40 @@
 
       document.querySelector(`#btn-${tab}`).classList.remove("bg-white", "text-gray-700", "border");
       document.querySelector(`#btn-${tab}`).classList.add("bg-gray-800", "text-white");
+
+      loadProducts(); // reload berdasarkan tab
     }
 
     function loadProducts() {
       const container = document.getElementById("product-list");
       container.innerHTML = "";
 
-      products.forEach(p => {
+      // filter berdasarkan tab (kategori)
+      const filtered = products.filter(p => {
+        if (activeTab === 'hot') return p.kategori === 'hot';
+        if (activeTab === 'cold') return p.kategori === 'cold';
+        if (activeTab === 'small') return p.kategori === 'small_bites' || p.kategori === 'small-bites' || p.kategori === 'small';
+        return true;
+      });
+
+      // jika tidak ada produk di tab tersebut
+      if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">Tidak ada menu pada kategori ini.</p>';
+        return;
+      }
+
+      filtered.forEach(p => {
         const qty = cart[p.id] ? cart[p.id].quantity : 0;
 
         container.innerHTML += `
           <div class="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl flex flex-col">
             <div class="h-40 bg-gray-200">
-              <img src="${p.image}" class="w-full h-full object-cover" />
+              <img src="${p.image}" class="w-full h-full object-cover" alt="${p.name}" />
             </div>
 
             <div class="p-4 flex flex-col flex-grow">
               <h3 class="text-lg font-bold mb-2">${p.name}</h3>
-              <p class="text-lg font-bold text-green-700 mb-4">Rp${p.price.toLocaleString()}</p>
+              <p class="text-lg font-bold text-green-700 mb-4">Rp${Number(p.price).toLocaleString('id-ID')}</p>
 
               ${qty === 0 ? `
                 <button onclick="addToCart('${p.id}')" class="w-full border-2 border-green-700 text-green-700 py-2 rounded-full font-bold hover:bg-green-700 hover:text-white">
@@ -195,13 +261,42 @@
       const totalPrice = Object.values(cart).reduce((a, b) => a + (b.price * b.quantity), 0);
 
       document.getElementById("cart-count").innerText = totalItems;
-      document.getElementById("cart-total").innerText = "Rp" + totalPrice.toLocaleString();
+      document.getElementById("cart-total").innerText = "Rp" + totalPrice.toLocaleString('id-ID');
 
       document.getElementById("checkout-footer").style.display = totalItems > 0 ? "block" : "none";
+
+      localStorage.setItem('cart', JSON.stringify(cart));
     }
 
+    // load awal
     loadProducts();
+
+        // === SIDEBAR LOGIC ===
+    const sidebar = document.getElementById("sidebar");
+    const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+    const openSidebarBtn = document.getElementById("open-sidebar");
+    const closeSidebarBtn = document.getElementById("close-sidebar");
+
+    function openSidebar() {
+      sidebar.classList.remove("translate-x-full");
+      sidebarBackdrop.classList.remove("hidden");
+    }
+
+    function closeSidebar() {
+      sidebar.classList.add("translate-x-full");
+      sidebarBackdrop.classList.add("hidden");
+    }
+
+    openSidebarBtn.addEventListener("click", () => {
+      openSidebar();
+      lucide.createIcons(); // pastikan icon "x" kebaca
+    });
+
+    closeSidebarBtn.addEventListener("click", closeSidebar);
+    sidebarBackdrop.addEventListener("click", closeSidebar);
   </script>
+
+  
 
 </body>
 </html>

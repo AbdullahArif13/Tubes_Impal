@@ -10,28 +10,6 @@
 </head>
 <body class="bg-gray-100">
 
-@php
-    // DATA SEMENTARA (nanti bisa ambil dari session/cart)
-    $items = [
-        [
-            'id' => 1,
-            'name' => 'HOT COFFEE AREN',
-            'price' => 23000,
-            'quantity' => 1,
-            'notes' => '',
-        ],
-    ];
-
-    $subtotal = collect($items)->sum(fn($i) => $i['price'] * $i['quantity']);
-    $serviceCharge = 1000;
-    $otherFees = 2300;
-    $discount = 0;
-    $total = $subtotal + $serviceCharge + $otherFees - $discount;
-
-    $totalItems = collect($items)->sum('quantity');
-@endphp
-
-
 <main class="bg-gray-100 min-h-screen pb-28 sm:pb-32">
 
     <!-- Header -->
@@ -60,42 +38,16 @@
         <div class="mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold">
-                    Item yang dipesan <span class="text-gray-600">({{ $totalItems }})</span>
+                    Item yang dipesan <span id="total-items-text" class="text-gray-600">(0)</span>
                 </h2>
                 <button class="border-2 border-gray-800 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-800 hover:text-white transition">
                     + Tambah
                 </button>
             </div>
 
-            <div class="space-y-6">
-                @foreach ($items as $item)
-                    <div class="border-b border-gray-300 pb-6">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex-1">
-                                <h3 class="font-bold text-lg">{{ $item['name'] }}</h3>
-                                <p class="text-gray-500 text-sm">
-                                    {{ $item['notes'] ?: 'Belum menambah catatan' }}
-                                </p>
-                            </div>
-                            <button class="text-blue-600 hover:text-blue-800">✎</button>
-                        </div>
-
-                        <div class="flex justify-between items-center">
-                            <p class="text-lg font-bold">Rp{{ number_format($item['price']) }}</p>
-
-                            <div class="flex items-center gap-3 bg-gray-100 rounded-lg p-2">
-                                <button class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded">−</button>
-                                <span class="w-4 text-center font-bold text-base">{{ $item['quantity'] }}</span>
-                                <button class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded">+</button>
-                            </div>
-                        </div>
-
-                        <div class="mt-2 text-gray-500 text-sm flex items-center gap-2">
-                            <span>✏️</span>
-                            <span>Tambah catatan lainnya</span>
-                        </div>
-                    </div>
-                @endforeach
+            <div id="items-container" class="space-y-6 text-sm text-gray-500">
+                {{-- diisi via JavaScript --}}
+                <p>Keranjang masih kosong.</p>
             </div>
         </div>
 
@@ -106,27 +58,27 @@
             <div class="space-y-4">
                 <div class="flex justify-between">
                     <span class="text-gray-700">Subtotal</span>
-                    <span class="font-semibold">Rp{{ number_format($subtotal) }}</span>
+                    <span id="subtotal-text" class="font-semibold">Rp0</span>
                 </div>
 
                 <div class="border-t pt-4 flex justify-between">
                     <span class="text-gray-700">Biaya Tambahan</span>
-                    <span class="font-semibold">Rp{{ number_format($serviceCharge) }}</span>
+                    <span id="service-charge-text" class="font-semibold">Rp1.000</span>
                 </div>
 
                 <div class="flex justify-between">
                     <span class="text-gray-700">Pembulatan</span>
-                    <span class="font-semibold">Rp{{ $discount }}</span>
+                    <span id="discount-text" class="font-semibold">Rp0</span>
                 </div>
 
                 <div class="flex justify-between">
                     <span class="text-gray-700">Biaya Lainnya</span>
-                    <span class="font-semibold">Rp{{ number_format($otherFees) }}</span>
+                    <span id="other-fees-text" class="font-semibold">Rp2.300</span>
                 </div>
 
                 <div class="border-t pt-4 flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>Rp{{ number_format($total) }}</span>
+                    <span id="total-text">Rp0</span>
                 </div>
             </div>
         </div>
@@ -137,9 +89,10 @@
         <div class="max-w-4xl mx-auto">
             <div class="mb-2">
                 <p class="text-gray-600 text-sm">Total Pembayaran</p>
-                <p class="text-2xl font-bold">Rp{{ number_format($total) }}</p>
+                <p id="total-bottom-text" class="text-2xl font-bold">Rp0</p>
             </div>
 
+            {{-- sementara tetap GET ke halaman isi data pelanggan --}}
             <a href="{{ route('RincianPembayaran') }}"
                class="w-full block bg-blue-900 text-white text-center py-3 rounded-lg font-bold hover:bg-blue-950 transition">
                 Lanjut Pembayaran
@@ -148,6 +101,100 @@
     </div>
 
 </main>
+
+<script>
+    // Ambil cart dari localStorage (diisi dari halaman menu)
+    // Struktur cart yang kita pakai di menu.blade: { [id]: {id, name, price, quantity, ...} }
+    const rawCart = localStorage.getItem('cart') || '{}';
+    const cartObj = JSON.parse(rawCart);
+    const items = Object.values(cartObj);
+
+    const serviceCharge = 1000;
+    const otherFees = 2300;
+    const discount = 0;
+
+    function formatRupiah(number) {
+        return 'Rp' + (number || 0).toLocaleString('id-ID');
+    }
+
+    const itemsContainer = document.getElementById('items-container');
+    const totalItemsText = document.getElementById('total-items-text');
+    const subtotalText = document.getElementById('subtotal-text');
+    const serviceChargeText = document.getElementById('service-charge-text');
+    const otherFeesText = document.getElementById('other-fees-text');
+    const discountText = document.getElementById('discount-text');
+    const totalText = document.getElementById('total-text');
+    const totalBottomText = document.getElementById('total-bottom-text');
+
+    if (!items.length) {
+        itemsContainer.innerHTML = '<p>Keranjang masih kosong.</p>';
+        totalItemsText.textContent = '(0)';
+        subtotalText.textContent = formatRupiah(0);
+        serviceChargeText.textContent = formatRupiah(serviceCharge);
+        otherFeesText.textContent = formatRupiah(otherFees);
+        discountText.textContent = formatRupiah(discount);
+        const total = serviceCharge + otherFees - discount;
+        totalText.textContent = formatRupiah(total);
+        totalBottomText.textContent = formatRupiah(total);
+    } else {
+        // hitung subtotal & total item
+        let subtotal = 0;
+        let totalItems = 0;
+
+        items.forEach(item => {
+            const qty = item.quantity || 0;
+            const price = item.price || 0;
+            subtotal += qty * price;
+            totalItems += qty;
+        });
+
+        // render list item
+        itemsContainer.innerHTML = items.map(item => {
+            const qty = item.quantity || 0;
+            const price = item.price || 0;
+            const notes = item.notes || 'Belum menambah catatan';
+
+            return `
+                <div class="border-b border-gray-300 pb-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg">${item.name}</h3>
+                            <p class="text-gray-500 text-sm">
+                                ${notes}
+                            </p>
+                        </div>
+                        <button class="text-blue-600 hover:text-blue-800">✎</button>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <p class="text-lg font-bold">${formatRupiah(price)}</p>
+
+                        <div class="flex items-center gap-3 bg-gray-100 rounded-lg p-2">
+                            <button disabled class="w-8 h-8 flex items-center justify-center rounded text-gray-400">−</button>
+                            <span class="w-4 text-center font-bold text-base">${qty}</span>
+                            <button disabled class="w-8 h-8 flex items-center justify-center rounded text-gray-400">+</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-2 text-gray-500 text-sm flex items-center gap-2">
+                        <span>✏️</span>
+                        <span>Tambah catatan lainnya</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        totalItemsText.textContent = `(${totalItems})`;
+        subtotalText.textContent = formatRupiah(subtotal);
+        serviceChargeText.textContent = formatRupiah(serviceCharge);
+        otherFeesText.textContent = formatRupiah(otherFees);
+        discountText.textContent = formatRupiah(discount);
+
+        const total = subtotal + serviceCharge + otherFees - discount;
+        totalText.textContent = formatRupiah(total);
+        totalBottomText.textContent = formatRupiah(total);
+    }
+</script>
 
 </body>
 </html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Kopi Boedaja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-4 text-center">Login</h1>
+        <p class="text-center text-gray-500 mb-6">
+            Halaman login (dummy). Nanti bisa diisi form beneran.
+        </p>
+        <a href="{{ route('menu') }}"
+           class="block text-center text-blue-600 hover:underline">
+            ← Kembali ke menu
+        </a>
+    </div>
+</body>
+</html>

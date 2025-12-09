@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pembayaran</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
 </head>
 <body class="bg-gray-100 min-h-screen pb-28 sm:pb-32">
 
@@ -19,12 +18,15 @@
     </div>
 
     @php
-        // Dummy Data (nanti bisa ambil dari session)
-        $subtotal = 23000;
+        // data dinamis dari DB
+        $subtotal      = $pesanan->total_harga ?? 0;
         $serviceCharge = 1000;
-        $discount = 0;
-        $otherFees = 2300;
-        $orderNumber = "CZK7RTWZ";
+        $discount      = 0;
+        $otherFees     = 2300;
+
+        // nomor pesanan dari id pesanan
+        $orderNumber = 'KBDJ' . str_pad($pesanan->id, 5, '0', STR_PAD_LEFT);
+
         $total = $subtotal + $serviceCharge + $otherFees - $discount;
     @endphp
 
@@ -40,6 +42,20 @@
                 </div>
             </div>
         </div>
+
+        {{-- (Opsional) Info meja / nama pemesan --}}
+        @if($pesanan->pelanggan ?? false)
+            <div class="bg-white rounded-lg border border-gray-300 px-4 sm:px-5 py-3 mb-6 flex flex-col gap-1 text-sm sm:text-base">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Atas nama</span>
+                    <span class="font-semibold">{{ $pesanan->pelanggan->nama }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Nomor meja</span>
+                    <span class="font-semibold">{{ $pesanan->pelanggan->nomor_meja }}</span>
+                </div>
+            </div>
+        @endif
 
         {{-- Nomor Pesanan --}}
         <div class="mb-6">
@@ -64,27 +80,37 @@
             <div class="space-y-4">
                 <div class="flex justify-between items-center gap-4 text-sm sm:text-base">
                     <span class="text-gray-700">Subtotal</span>
-                    <span class="font-semibold text-right">Rp{{ number_format($subtotal) }}</span>
+                    <span class="font-semibold text-right">
+                        Rp{{ number_format($subtotal, 0, ',', '.') }}
+                    </span>
                 </div>
 
                 <div class="border-t border-gray-200 pt-4 flex justify-between items-center gap-4 text-sm sm:text-base">
                     <span class="text-gray-700">Biaya Tambahan</span>
-                    <span class="font-semibold text-right">Rp{{ number_format($serviceCharge) }}</span>
+                    <span class="font-semibold text-right">
+                        Rp{{ number_format($serviceCharge, 0, ',', '.') }}
+                    </span>
                 </div>
 
                 <div class="flex justify-between items-center gap-4 text-sm sm:text-base">
                     <span class="text-gray-700">Pembulatan</span>
-                    <span class="font-semibold text-right">Rp{{ number_format($discount) }}</span>
+                    <span class="font-semibold text-right">
+                        Rp{{ number_format($discount, 0, ',', '.') }}
+                    </span>
                 </div>
 
                 <div class="flex justify-between items-center gap-4 text-sm sm:text-base">
                     <span class="text-gray-700">Biaya lainnya</span>
-                    <span class="font-semibold text-right">Rp{{ number_format($otherFees) }}</span>
+                    <span class="font-semibold text-right">
+                        Rp{{ number_format($otherFees, 0, ',', '.') }}
+                    </span>
                 </div>
 
                 <div class="border-t border-gray-300 pt-4 flex justify-between items-center gap-4">
                     <span class="text-base sm:text-lg font-bold">Total</span>
-                    <span class="text-base sm:text-lg font-bold text-right">Rp{{ number_format($total) }}</span>
+                    <span class="text-base sm:text-lg font-bold text-right">
+                        Rp{{ number_format($total, 0, ',', '.') }}
+                    </span>
                 </div>
             </div>
         </div>
