@@ -28,4 +28,15 @@ class Detail_Pesanan extends Model
     {
         return $this->belongsTo(Menu::class);
     }
+
+    public function getSubtotalAttribute($value)
+    {
+        // jika kamu menyimpan subtotal di kolom: return $value;
+        // kalau tidak menyimpan, hitung berdasarkan harga*jumlah
+        if ($value) {
+            return (int) $value;
+        }
+
+        return (int) (($this->harga ?? 0) * ($this->jumlah ?? 0));
+    }
 }

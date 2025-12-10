@@ -18,6 +18,9 @@ return new class extends Migration
             $table->unsignedInteger('jumlah');
             $table->unsignedInteger('subtotal');
             $table->timestamps();
+
+            $table->index('pesanan_id');
+            $table->index('menu_id');
         });
     }
 

@@ -15,6 +15,7 @@ class Pesanan extends Model
         'pelanggan_id',
         'total_harga',
         'status',
+        'catatan'
     ];
 
     public function pelanggan()
@@ -25,5 +26,20 @@ class Pesanan extends Model
     public function details()
     {
         return $this->hasMany(Detail_Pesanan::class);
+    }
+
+    // helper untuk menghitung total dari detail_pesanans
+    public function calculateTotal(): int
+    {
+        return $this->detailPesanans()->get()->sum(function ($d) {
+            return ($d->harga ?? 0) * ($d->jumlah ?? 0);
+        });
+    }
+
+    // panggil saat menyimpan/checkout
+    public function recalcAndSaveTotal()
+    {
+        $this->total_harga = $this->calculateTotal();
+        $this->save();
     }
 }

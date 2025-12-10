@@ -19,8 +19,13 @@ class Menu extends Model
         'kategori',
         'tersedia'
     ];
-
+    
     protected $casts = [
         'tersedia' => 'boolean',
     ];
+
+    public function detailPesanans()
+    {
+        return $this->hasMany(DetailPesanan::class);
+    }
 }

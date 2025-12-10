@@ -2,23 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pelanggan;
 use App\Models\Pesanan;
 use App\Models\Detail_Pesanan;
 use Illuminate\Http\Request;
 
 class PesananController extends Controller
 {
-    // ini nanti akan dipanggil dari form "Lanjut Pembayaran"
+    // dipanggil dari form "Lanjut Pembayaran"
     public function store(Request $request)
     {
-        // sementara: kita anggap form kirim field ini
+        // sekarang cuma butuh cart
         $data = $request->validate([
-            'nama'         => 'required|string|max:255',
-            'nomor_ponsel' => 'nullable|string|max:50',
-            'email'        => 'nullable|email',
-            'nomor_meja'   => 'required|string|max:50',
-            'cart'         => 'required|string', // JSON keranjang
+            'cart' => 'required|string', // JSON keranjang
         ]);
 
         // decode cart
@@ -28,13 +23,8 @@ class PesananController extends Controller
             return back()->with('error', 'Keranjang kosong.');
         }
 
-        // 1. simpan pelanggan
-        $pelanggan = Pelanggan::create([
-            'nama'         => $data['nama'],
-            'nomor_ponsel' => $data['nomor_ponsel'] ?? null,
-            'email'        => $data['email'] ?? null,
-            'nomor_meja'   => $data['nomor_meja'],
-        ]);
+        // 1. untuk saat ini: guest checkout, tidak ada pelanggan
+        $pelangganId = null;
 
         // 2. hitung total harga dari cart
         $total = 0;
@@ -46,9 +36,10 @@ class PesananController extends Controller
 
         // 3. simpan pesanan
         $pesanan = Pesanan::create([
-            'pelanggan_id' => $pelanggan->id,
+            'pelanggan_id' => $pelangganId, // boleh null (sudah di-migration)
             'total_harga'  => $total,
-            'status'       => 'pending', // nanti bisa diupdate jadi 'dibayar'
+            'status'       => 'pending',
+            'catatan' => $request->input('catatan', null),
         ]);
 
         // 4. simpan detail pesanan
@@ -68,20 +59,17 @@ class PesananController extends Controller
             ]);
         }
 
-        // 5. setelah semua tersimpan, arahkan ke halaman Pembayaran
+        // 5. redirect ke halaman Pembayaran (kode pesanan)
         return redirect()->route('Pembayaran', ['pesanan' => $pesanan->id]);
     }
 
     public function show(Pesanan $pesanan)
     {
-        // muat relasi pelanggan + detail + menu,
-        // biar nanti di view bisa akses $pesanan->pelanggan, $pesanan->details
+        // pelanggan boleh null, tapi detail & menu tetap diload
         $pesanan->load(['pelanggan', 'details.menu']);
 
         return view('Pembayaran', [
             'pesanan' => $pesanan,
         ]);
     }
-
-
 }

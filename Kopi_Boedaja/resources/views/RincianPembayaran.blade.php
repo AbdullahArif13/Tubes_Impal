@@ -10,11 +10,9 @@
 
     <!-- Header -->
     <div class="bg-white sticky top-0 z-50 px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-4 border-b border-gray-200">
-        <a href="{{ url()->previous() }}" class="p-2 hover:bg-gray-100 rounded-lg transition flex-shrink-0">
+        <a href="{{ route('RincianPesanan') }}" class="p-2 hover:bg-gray-100 rounded-lg transition flex-shrink-0">
             <!-- ChevronLeft Icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
+            ←
         </a>
         <h1 class="text-lg sm:text-xl font-bold flex-1 text-center">Pembayaran</h1>
         <div class="w-8"></div>
@@ -22,7 +20,10 @@
 
     <form action="{{ route('pesanan.store') }}" method="POST" class="px-4 sm:px-6 lg:px-8 py-6 max-w-2xl mx-auto">
         @csrf
-        <input type="hidden" name="cart" id="cart-input">            
+
+        {{-- cart dalam bentuk JSON, akan diisi dari localStorage via JS --}}
+        <input type="hidden" name="cart" id="cart-input">
+
         <!-- Tipe Pemesanan -->
         <div class="bg-white rounded-lg border border-gray-300 px-4 sm:px-5 py-3 mb-6 flex items-center justify-between gap-4">
             <span class="font-semibold text-gray-700 text-sm sm:text-base">Tipe Pemesanan</span>
@@ -34,70 +35,34 @@
             </div>
         </div>
 
-        <!-- Informasi Pemesan -->
+        <!-- Ringkasan (tanpa form identitas) -->
         <div class="bg-white rounded-2xl p-5 sm:p-6 mb-6">
-            <h2 class="text-base sm:text-lg font-bold mb-6">Informasi Pemesan</h2>
+            <h2 class="text-base sm:text-lg font-bold mb-4">Ringkasan Pesanan</h2>
 
-            <!-- Nama Lengkap -->
-            <div class="mb-6">
-                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                    Nama Lengkap<span class="text-red-500">*</span>
-                </label>
-                <div class="flex items-center gap-3 bg-gray-100 rounded-lg px-4 py-3 border border-gray-300">
-                    <input 
-                        type="text" 
-                        name="nama" 
-                        placeholder="Hanif Haidar"
-                        class="bg-transparent flex-1 outline-none text-sm sm:text-base text-gray-800"
-                        required
-                    >
+            <div class="space-y-3 text-sm sm:text-base">
+                <div class="flex justify-between">
+                    <span class="text-gray-700">Subtotal</span>
+                    <span id="subtotal-text" class="font-semibold">Rp0</span>
                 </div>
-            </div>
 
-            <!-- Nomor Ponsel -->
-            <div class="mb-6">
-                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                    Nomor Ponsel <span class="text-gray-400 text-xs">(untuk info promo)</span>
-                </label>
-                <div class="flex items-center gap-3 bg-gray-100 rounded-lg px-4 py-3 border border-gray-300">
-                    <input 
-                        type="tel" 
-                        name="nomor_ponsel"
-                        placeholder="0812-3456-7890"
-                        class="bg-transparent flex-1 outline-none text-sm sm:text-base text-gray-800"
-                        required
-                    >
+                <div class="flex justify-between">
+                    <span class="text-gray-700">Biaya Tambahan</span>
+                    <span id="service-charge-text" class="font-semibold">Rp1.000</span>
                 </div>
-            </div>
 
-            <!-- Email -->
-            <div class="mb-6">
-                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                    Kirim struk ke email
-                </label>
-                <div class="flex items-center gap-3 bg-gray-100 rounded-lg px-4 py-3 border border-gray-300">
-                    <input 
-                        type="email" 
-                        name="email"
-                        placeholder="adakahseratus@gmail.com"
-                        class="bg-transparent flex-1 outline-none text-sm sm:text-base text-gray-800"
-                    >
+                <div class="flex justify-between">
+                    <span class="text-gray-700">Pembulatan</span>
+                    <span id="discount-text" class="font-semibold">Rp0</span>
                 </div>
-            </div>
 
-            <!-- Nomor Meja -->
-            <div class="mb-6">
-                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                    Nomor Meja<span class="text-red-500">*</span>
-                </label>
-                <div class="flex items-center gap-3 bg-gray-100 rounded-lg px-4 py-3 border border-gray-300">
-                    <input 
-                        type="text" 
-                        name="nomor_meja"
-                        placeholder="Lantai 1 - 28"
-                        class="bg-transparent flex-1 outline-none text-sm sm:text-base text-gray-800"
-                        required
-                    >
+                <div class="flex justify-between">
+                    <span class="text-gray-700">Biaya lainnya</span>
+                    <span id="other-fees-text" class="font-semibold">Rp2.300</span>
+                </div>
+
+                <div class="border-t border-gray-200 pt-4 flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span id="total-text">Rp0</span>
                 </div>
             </div>
         </div>
@@ -107,7 +72,7 @@
             <div class="max-w-2xl mx-auto">
                 <div class="mb-2">
                     <p class="text-gray-600 text-xs sm:text-sm">Total Pembayaran</p>
-                    <p class="text-xl sm:text-2xl font-bold">Rp{{ number_format($total ?? 0) }}</p>
+                    <p id="total-bottom-text" class="text-xl sm:text-2xl font-bold">Rp0</p>
                 </div>
                 <button 
                     type="submit"
@@ -121,19 +86,66 @@
     </form>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const cartInput = document.getElementById('cart-input');
-        if (!cartInput) return;
+        // ambil keranjang dari localStorage
+        document.addEventListener('DOMContentLoaded', function () {
+            const cartInput          = document.getElementById('cart-input');
+            const subtotalText       = document.getElementById('subtotal-text');
+            const serviceChargeText  = document.getElementById('service-charge-text');
+            const discountText       = document.getElementById('discount-text');
+            const otherFeesText      = document.getElementById('other-fees-text');
+            const totalText          = document.getElementById('total-text');
+            const totalBottomText    = document.getElementById('total-bottom-text');
 
-        const cart = localStorage.getItem('cart');
-        if (cart) {
-            cartInput.value = cart;
-            // optional: console.log(cart) untuk ngecek
-        } else {
-            console.warn('Cart tidak ditemukan di localStorage');
-        }
-    });
+            const serviceCharge = 1000;
+            const otherFees     = 2300;
+            const discount      = 0;
+
+            function formatRupiah(number) {
+                return 'Rp' + (number || 0).toLocaleString('id-ID');
+            }
+
+            const rawCart = localStorage.getItem('cart') || '{}';
+            let cart;
+
+            try {
+                cart = JSON.parse(rawCart);
+            } catch (e) {
+                cart = {};
+            }
+
+            const items = Object.values(cart);
+
+            // isi hidden input cart
+            cartInput.value = JSON.stringify(cart);
+
+            if (!items.length) {
+                const total = serviceCharge + otherFees - discount;
+                subtotalText.textContent    = formatRupiah(0);
+                serviceChargeText.textContent = formatRupiah(serviceCharge);
+                discountText.textContent    = formatRupiah(discount);
+                otherFeesText.textContent   = formatRupiah(otherFees);
+                totalText.textContent       = formatRupiah(total);
+                totalBottomText.textContent = formatRupiah(total);
+                return;
+            }
+
+            // hitung subtotal dari cart
+            let subtotal = 0;
+            items.forEach(item => {
+                const qty   = item.quantity || 0;
+                const price = item.price || 0;
+                subtotal += qty * price;
+            });
+
+            const total = subtotal + serviceCharge + otherFees - discount;
+
+            subtotalText.textContent      = formatRupiah(subtotal);
+            serviceChargeText.textContent = formatRupiah(serviceCharge);
+            discountText.textContent      = formatRupiah(discount);
+            otherFeesText.textContent     = formatRupiah(otherFees);
+            totalText.textContent         = formatRupiah(total);
+            totalBottomText.textContent   = formatRupiah(total);
+        });
     </script>
-
 </body>
 </html>

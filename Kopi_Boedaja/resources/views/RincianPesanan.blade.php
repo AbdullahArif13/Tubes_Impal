@@ -24,15 +24,14 @@
     <div class="px-4 py-6 max-w-4xl mx-auto">
 
         <!-- Delivery Type -->
-        <div class="bg-white rounded-lg border px-4 py-3 mb-6 flex items-center justify-between">
-            <span class="font-semibold text-gray-700">Tipe Pemesanan</span>
-            <div class="flex items-center gap-2">
-                <span class="text-gray-700 text-sm">Makan di tempat</span>
-                <div class="w-6 h-6 rounded-full border-2 border-green-600 flex items-center justify-center">
-                    <div class="w-3 h-3 rounded-full bg-green-600"></div>
-                </div>
-            </div>
+        <div class="bg-white rounded-lg border px-4 py-3 mb-6">
+            <p class="text-sm text-gray-500">Tipe Pemesanan</p>
+            <p id="orderTypeText" class="text-lg font-bold text-green-700">
+                <!-- akan diisi via JavaScript -->
+                -
+            </p>
         </div>
+
 
         <!-- Items Section -->
         <div class="mb-6">
@@ -94,7 +93,7 @@
 
             {{-- sementara tetap GET ke halaman isi data pelanggan --}}
             <a href="{{ route('RincianPembayaran') }}"
-               class="w-full block bg-blue-900 text-white text-center py-3 rounded-lg font-bold hover:bg-blue-950 transition">
+               class="w-full block bg-green-700 text-white text-center py-3 rounded-lg font-bold hover:bg-blue-950 transition">
                 Lanjut Pembayaran
             </a>
         </div>
@@ -103,6 +102,35 @@
 </main>
 
 <script>
+        // === TAMPILKAN TIPE PEMESANAN DARI HALAMAN UTAMA ===
+    document.addEventListener('DOMContentLoaded', function () {
+        const orderTypeTextEl = document.getElementById('orderTypeText');
+        if (!orderTypeTextEl) return;
+
+        // baca dari localStorage (diset di halaman utama)
+        const orderType = localStorage.getItem('kopi_boedaja_order_type') || 'dine_in';
+        const mejaRaw   = localStorage.getItem('kopi_boedaja_meja');
+
+        let text = '';
+
+        if (orderType === 'take_away') {
+            text = 'Dibawa Pulang';
+        } else {
+            // dine in
+            if (mejaRaw) {
+                try {
+                    const data = JSON.parse(mejaRaw);
+                    text = `Makan di tempat — Lantai ${data.lantai}, Meja ${data.meja}`;
+                } catch (e) {
+                    text = 'Makan di tempat';
+                }
+            } else {
+                text = 'Makan di tempat';
+            }
+        }
+
+        orderTypeTextEl.textContent = text;
+    });
     // Ambil cart dari localStorage (diisi dari halaman menu)
     // Struktur cart yang kita pakai di menu.blade: { [id]: {id, name, price, quantity, ...} }
     const rawCart = localStorage.getItem('cart') || '{}';

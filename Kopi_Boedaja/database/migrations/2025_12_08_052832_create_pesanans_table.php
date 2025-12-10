@@ -16,7 +16,11 @@ return new class extends Migration
             $table->foreignId('pelanggan_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('total_harga');
             $table->string('status');
+            $table->text('catatan');
             $table->timestamps();
+
+            $table->index('status');
+            $table->index('created_at');
         });
     }
 

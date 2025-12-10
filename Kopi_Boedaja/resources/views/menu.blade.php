@@ -15,13 +15,22 @@
 
   <!-- TOP BUTTONS -->
   <div class="bg-gray-100 sticky top-0 z-50 px-4 py-3 flex justify-end gap-3 w-full">
-    <button class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:shadow-lg"> 
+    <button id="menu-search-btn"
+            class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:shadow-lg"> 
       <i data-lucide="search" class="w-5 h-5"></i> 
     </button>
     <button id="open-sidebar"
             class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:shadow-lg">
       <i data-lucide="menu" class="w-5 h-5"></i>
     </button>
+  </div>
+
+  <div id="search-popup"
+      class="hidden fixed top-20 right-4 left-4 bg-white rounded-xl shadow-lg p-3 z-50">
+    <input id="search-input"
+          type="text"
+          placeholder="Cari menu..."
+          class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-green-300">
   </div>
   
     <!-- OVERLAY -->
@@ -30,34 +39,48 @@
 
   <!-- SIDEBAR -->
   <div id="sidebar"
-       class="fixed inset-y-0 right-0 w-72 bg-white shadow-xl transform translate-x-full
+       class="fixed inset-y-0 right-0 w-72 bg-green-900 text-white shadow-xl transform translate-x-full
               transition-transform duration-300 z-50 flex flex-col">
 
     <!-- HEADER SIDEBAR -->
-    <div class="p-4 border-b flex items-center justify-between">
-      <h3 class="font-bold text-lg">Menu</h3>
+    <div class="p-4 border-b border-green-700 flex items-center justify-between">
+      <h3 class="font-bold text-lg tracking-wide">KOPI BOEDAJA</h3>
       <button id="close-sidebar"
-              class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100">
+              class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-green-800">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
     </div>
 
     <!-- BODY SIDEBAR -->
-    <div class="p-4 flex flex-col gap-3">
+     <div class="p-4 flex flex-col gap-3">
       <a href="{{ route('login') }}"
-         class="w-full py-2 px-3 rounded-lg border font-semibold text-left hover:bg-gray-50">
-        Login
+         class="w-full py-2 px-3 rounded-lg bg-white text-green-900 font-semibold text-left hover:bg-gray-100">
+        Masuk untuk info promo!
       </a>
 
-      <a href="{{ route('register') }}"
-         class="w-full py-2 px-3 rounded-lg border font-semibold text-left hover:bg-gray-50">
-        Sign Up
-      </a>
+      @if(session()->has('pelanggan_id'))
+        <a href="{{ route('promo.index') }}"
+           class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+          Lihat Promo
+        </a>
+      @else
+        <a href="{{ route('login') }}"
+           class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+          Lihat Promo
+        </a>
+      @endif
 
-      <a href="{{ route('promo.index') }}"
-         class="w-full py-2 px-3 rounded-lg border font-semibold text-left hover:bg-gray-50">
-        Lihat Promo
-      </a>
+      @if(session()->has('pelanggan_id'))
+        <a href="#"
+           class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+          Riwayat Pesanan
+        </a>
+      @else
+        <a href="{{ route('login') }}"
+           class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+          Riwayat Pesanan
+        </a>
+      @endif
     </div>
   </div>
 
@@ -76,24 +99,32 @@
         <!-- TEXT CENTER -->
         <div class="text-center w-full pr-12">
           <h2 class="text-lg font-bold truncate">KOPI BOEDAJA</h2>
-          <p class="text-gray-600 text-xs">Buka hari ini 00.00 - 23.59</p>
+          <p class="text-gray-600 text-xs">Buka hari ini 09.00 - 21.00</p>
         </div>
       </div>
     </div>
 
     <!-- TABS + NOMOR MEJA -->
     <div class="sticky top-28 z-30 bg-gray-100 mb-6">
-      <div class="bg-green-700 text-white py-2 px-4 rounded-lg text-center mb-4 font-bold text-sm">
-        Nomor Meja: Lantai 1 - 28
+      <!-- PILIH TIPE PESANAN -->
+      <div class="flex gap-2 mb-2">
+        <button id="dineInBtn"
+                class="flex-1 px-3 py-2 rounded-lg text-sm font-semibold bg-green-700 text-white">
+          Makan di tempat
+        </button>
+        <button id="takeAwayBtn"
+                class="flex-1 px-3 py-2 rounded-lg text-sm font-semibold bg-white text-green-700 border border-green-700">
+          Bawa Pulang
+        </button>
       </div>
 
-      <div class="flex items-center gap-3 overflow-x-auto pb-2">
-        <button class="text-gray-700 min-w-[40px] hover:text-gray-900">
-          <i data-lucide="menu" class="w-5 h-5"></i>
-        </button>
+      <!-- PILIH MEJA (hanya dipakai kalau makan di tempat) -->
+      <button id="mejaButton"
+              class="w-full bg-green-700 text-white py-2 px-4 rounded-lg text-center mb-4 font-bold text-sm">
+        <span id="mejaLabel">Pilih Lantai & Nomor Meja</span>
+      </button>
 
-        <div class="border-r border-gray-400 h-6"></div>
-
+      <div class="flex items-center justify-center gap-3 overflow-x-auto pb-2">
         <button onclick="setTab('hot')" id="btn-hot" class="px-3 py-2 rounded-full font-semibold bg-gray-800 text-white">
           ☕ Hot Series
         </button>
@@ -111,6 +142,42 @@
     <!-- PRODUCT LIST -->
     <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-32"></div>
 
+  </div>
+
+  <!-- MODAL PILIH MEJA -->
+  <div id="mejaModal"
+      class="fixed inset-0 bg-black/40 z-40 hidden items-center justify-center">
+    <div class="bg-white rounded-2xl p-4 w-full max-w-sm mx-4">
+      <h3 class="font-semibold text-lg mb-3 text-gray-800">Pilih Meja</h3>
+
+      <div class="mb-3">
+        <label class="block text-sm mb-1 text-gray-700">Lantai</label>
+        <select id="lantaiSelect"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          <option value="1">Lantai 1</option>
+          <option value="2">Lantai 2</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm mb-1 text-gray-700">Nomor Meja</label>
+        <select id="mejaSelect"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          <!-- diisi via JS -->
+        </select>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button id="mejaCancel"
+                class="px-3 py-1.5 text-sm rounded-lg text-gray-700 hover:bg-gray-100">
+          Batal
+        </button>
+        <button id="mejaSave"
+                class="px-3 py-1.5 text-sm rounded-lg bg-green-700 text-white font-semibold hover:bg-green-800">
+          Simpan
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- CHECKOUT FOOTER -->
@@ -131,11 +198,10 @@
         </div>
       </div>
 
-      <a href="{{ route('RincianPesanan') }}" >
-        <button class="bg-white text-blue-900 px-6 py-2 rounded-lg font-bold hover:bg-gray-100">
-          CHECK OUT
-        </button>
-      </a>
+      <button id="checkout-btn"
+              class="bg-white text-blue-900 px-6 py-2 rounded-lg font-bold hover:bg-gray-100">
+        CHECK OUT
+      </button>
     </div>
   </div>
 
@@ -203,7 +269,8 @@
         const qty = cart[p.id] ? cart[p.id].quantity : 0;
 
         container.innerHTML += `
-          <div class="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl flex flex-col">
+          <div class="menu-card bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl flex flex-col"
+            data-name="${p.name.toLowerCase()}">
             <div class="h-40 bg-gray-200">
               <img src="${p.image}" class="w-full h-full object-cover" alt="${p.name}" />
             </div>
@@ -271,6 +338,155 @@
     // load awal
     loadProducts();
 
+    // === LOGIKA PILIH MEJA ===
+    const mejaButton = document.getElementById("mejaButton");
+    const mejaLabel  = document.getElementById("mejaLabel");
+    const mejaModal  = document.getElementById("mejaModal");
+    const lantaiSelect = document.getElementById("lantaiSelect");
+    const mejaSelect   = document.getElementById("mejaSelect");
+    const mejaCancel   = document.getElementById("mejaCancel");
+    const mejaSave     = document.getElementById("mejaSave");
+
+    // isi pilihan meja 1..30
+    for (let i = 1; i <= 30; i++) {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = `Meja ${i}`;
+      mejaSelect.appendChild(opt);
+    }
+
+    // load dari localStorage kalau sudah pernah pilih
+    const savedMeja = localStorage.getItem("kopi_boedaja_meja");
+    if (savedMeja) {
+      try {
+        const data = JSON.parse(savedMeja);
+        if (data.lantai) lantaiSelect.value = data.lantai;
+        if (data.meja) mejaSelect.value = data.meja;
+        mejaLabel.textContent = `Nomor Meja: Lantai ${data.lantai} - ${data.meja}`;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // buka modal
+    if (mejaButton) {
+      mejaButton.addEventListener("click", () => {
+        mejaModal.classList.remove("hidden");
+        mejaModal.classList.add("flex");
+      });
+    }
+
+    // tutup modal tanpa simpan
+    if (mejaCancel) {
+      mejaCancel.addEventListener("click", () => {
+        mejaModal.classList.add("hidden");
+        mejaModal.classList.remove("flex");
+      });
+    }
+
+    // simpan pilihan
+    if (mejaSave) {
+      mejaSave.addEventListener("click", () => {
+        const lantai = lantaiSelect.value;
+        const meja   = mejaSelect.value;
+
+        mejaLabel.textContent = `Nomor Meja: Lantai ${lantai} - ${meja}`;
+
+        // simpan ke localStorage supaya keingat kalau buka lagi
+        localStorage.setItem(
+          "kopi_boedaja_meja",
+          JSON.stringify({ lantai, meja })
+        );
+
+        mejaModal.classList.add("hidden");
+        mejaModal.classList.remove("flex");
+      });
+    }
+
+    // === TIPE PESANAN: MAKAN DI TEMPAT / TAKE AWAY ===
+    let orderType = localStorage.getItem('kopi_boedaja_order_type') || 'dine_in';
+
+    const dineInBtn   = document.getElementById('dineInBtn');
+    const takeAwayBtn = document.getElementById('takeAwayBtn');
+    const mejaBtn     = document.getElementById('mejaButton');
+
+    function syncOrderTypeButtons() {
+      if (!dineInBtn || !takeAwayBtn) return;
+
+      if (orderType === 'dine_in') {
+        dineInBtn.classList.add('bg-green-700','text-white');
+        dineInBtn.classList.remove('bg-white','text-green-700','border','border-green-700');
+
+        takeAwayBtn.classList.add('bg-white','text-green-700','border','border-green-700');
+        takeAwayBtn.classList.remove('bg-green-700','text-white');
+
+        if (mejaBtn) {
+          mejaBtn.disabled = false;
+          mejaBtn.classList.remove('opacity-60','cursor-not-allowed');
+        }
+      } else {
+        // take away
+        takeAwayBtn.classList.add('bg-green-700','text-white');
+        takeAwayBtn.classList.remove('bg-white','text-green-700','border','border-green-700');
+
+        dineInBtn.classList.add('bg-white','text-green-700','border','border-green-700');
+        dineInBtn.classList.remove('bg-green-700','text-white');
+
+        if (mejaBtn) {
+          mejaBtn.disabled = true;
+          mejaBtn.classList.add('opacity-60','cursor-not-allowed');
+        }
+      }
+    }
+
+    if (dineInBtn) {
+      dineInBtn.addEventListener('click', () => {
+        orderType = 'dine_in';
+        localStorage.setItem('kopi_boedaja_order_type', orderType);
+        syncOrderTypeButtons();
+      });
+    }
+
+    if (takeAwayBtn) {
+      takeAwayBtn.addEventListener('click', () => {
+        orderType = 'take_away';
+        localStorage.setItem('kopi_boedaja_order_type', orderType);
+        syncOrderTypeButtons();
+      });
+    }
+
+    // panggil sekali saat load
+    syncOrderTypeButtons();
+
+    const checkoutBtn = document.getElementById('checkout-btn');
+    const checkoutUrl = "{{ route('RincianPesanan') }}";
+
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', () => {
+        const totalItems = Object.values(cart).reduce((a, b) => a + b.quantity, 0);
+        if (totalItems === 0) {
+          return; // harusnya tombolnya gak muncul kalau 0, tapi jaga-jaga
+        }
+
+        if (orderType === 'dine_in') {
+          const mejaData = localStorage.getItem('kopi_boedaja_meja');
+          if (!mejaData) {
+            alert('Silakan pilih lantai & nomor meja terlebih dahulu.');
+            document.getElementById('mejaButton')
+                    .scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+        }
+
+        // simpan tipe pesanan (kalau halaman rincian butuh)
+        localStorage.setItem('kopi_boedaja_order_type', orderType);
+
+        // lanjut ke halaman rincian pesanan
+        window.location.href = checkoutUrl;
+      });
+    }
+
+
         // === SIDEBAR LOGIC ===
     const sidebar = document.getElementById("sidebar");
     const sidebarBackdrop = document.getElementById("sidebar-backdrop");
@@ -294,6 +510,27 @@
 
     closeSidebarBtn.addEventListener("click", closeSidebar);
     sidebarBackdrop.addEventListener("click", closeSidebar);
+  </script>
+
+  <script>
+    const searchBtn = document.getElementById("menu-search-btn");
+    const searchPopup = document.getElementById("search-popup");
+    const searchInput = document.getElementById("search-input");
+
+    searchBtn.addEventListener("click", () => {
+      searchPopup.classList.toggle("hidden");
+      searchInput.focus();
+    });
+
+    searchInput.addEventListener("input", function () {
+      const keyword = this.value.toLowerCase();
+      const cards = document.querySelectorAll(".menu-card");
+
+      cards.forEach(card => {
+        const name = card.dataset.name;
+        card.style.display = name.includes(keyword) ? "flex" : "none";
+      });
+    });
   </script>
 
   

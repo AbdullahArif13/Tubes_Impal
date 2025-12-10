@@ -88,7 +88,7 @@ class PesananResource extends Resource
     {
         return [
             //
-            DetailPesanansRelation::class,
+           
         ];
     }
 

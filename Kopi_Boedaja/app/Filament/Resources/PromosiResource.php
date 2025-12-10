@@ -24,6 +24,27 @@ class PromosiResource extends Resource
         return $form
             ->schema([
                 //
+                Forms\Components\Select::make('tipe')
+                    ->options([
+                        'percent' => 'Persentase',
+                        'fixed'   => 'Potongan Tetap',
+                        'b1g1'    => 'Beli X Dapat Y',
+                    ])
+                    ->required(),
+
+                Forms\Components\TextInput::make('nilai')
+                    ->label('Nilai (persen atau nominal)')
+                    ->numeric()
+                    ->required(),
+
+                Forms\Components\TextInput::make('maks_potongan')
+                    ->label('Maks Potongan (untuk persen)')
+                    ->numeric()
+                    ->visible(fn ($get) => $get('tipe') === 'percent'),
+
+                Forms\Components\TextInput::make('buy_x')->visible(fn ($get) => $get('tipe') === 'b1g1'),
+                Forms\Components\TextInput::make('get_y')->visible(fn ($get) => $get('tipe') === 'b1g1'),
+
             ]);
     }
 
