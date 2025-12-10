@@ -24,6 +24,24 @@ class PesananResource extends Resource
         return $form
             ->schema([
                 //
+                Forms\Components\Select::make('pelanggan_id')
+                    ->relationship('pelanggan', 'name')
+                    ->label('Pelanggan')
+                    ->disabled(), // pelanggan tidak bisa diubah
+
+                Forms\Components\TextInput::make('total_harga')
+                    ->numeric()
+                    ->label('Total Harga')
+                    ->disabled(), // total harga dihitung dari detail pesanan
+
+                Forms\Components\Select::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'diproses' => 'Diproses',
+                        'selesai' => 'Selesai',
+                    ])
+                    ->label('Status')
+                    ->required(),
             ]);
     }
 
@@ -32,6 +50,26 @@ class PesananResource extends Resource
         return $table
             ->columns([
                 //
+                Tables\Columns\TextColumn::make('id')->sortable(),
+                Tables\Columns\TextColumn::make('pelanggan.name')
+                    ->label('Pelanggan')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('total_harga')
+                    ->label('Total')
+                    ->money('IDR'),
+
+                Tables\Columns\BadgeColumn::make('status')
+                    ->colors([
+                        'warning' => 'pending',
+                        'info' => 'diproses',
+                        'success' => 'selesai',
+                    ]),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->label('Tanggal')
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -50,6 +88,7 @@ class PesananResource extends Resource
     {
         return [
             //
+            DetailPesanansRelation::class,
         ];
     }
 
@@ -57,7 +96,6 @@ class PesananResource extends Resource
     {
         return [
             'index' => Pages\ListPesanans::route('/'),
-            'create' => Pages\CreatePesanan::route('/create'),
             'edit' => Pages\EditPesanan::route('/{record}/edit'),
         ];
     }

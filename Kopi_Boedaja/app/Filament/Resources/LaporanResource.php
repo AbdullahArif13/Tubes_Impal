@@ -32,6 +32,25 @@ class LaporanResource extends Resource
         return $table
             ->columns([
                 //
+                 Tables\Columns\TextColumn::make('tanggal')
+                ->label('Tanggal')
+                ->date()
+                ->sortable(),
+
+                Tables\Columns\TextColumn::make('nama_menu')
+                    ->label('Nama Menu')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('jumlah')
+                    ->label('Jumlah'),
+
+                Tables\Columns\TextColumn::make('harga')
+                    ->label('Harga')
+                    ->money('IDR'),
+
+                Tables\Columns\TextColumn::make('total')
+                    ->label('Total')
+                    ->money('IDR'),
             ])
             ->filters([
                 //
@@ -57,8 +76,6 @@ class LaporanResource extends Resource
     {
         return [
             'index' => Pages\ListLaporans::route('/'),
-            'create' => Pages\CreateLaporan::route('/create'),
-            'edit' => Pages\EditLaporan::route('/{record}/edit'),
         ];
     }
 }
