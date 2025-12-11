@@ -10,7 +10,7 @@ class Detail_Pesanan extends Model
     use HasFactory;
 
     // karena nama tabelmu 'detail__pesanans' (double underscore)
-    protected $table = 'detail__pesanans';
+    protected $table = 'detail_pesanans';
 
     protected $fillable = [
         'pesanan_id',
