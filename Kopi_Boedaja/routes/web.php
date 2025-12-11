@@ -3,49 +3,61 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PesananController;
+use App\Http\Controllers\AuthController;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Public: menu & checkout (guest boleh pesan).
+| Auth: register/login/logout (tidak wajib sebelum pesan).
+| Pembayaran detail ditampilkan setelah pesanan disimpan.
+|
+*/
 
-// 1. Halaman Menu
+/*
+|---------------------
+| Public / Guest routes
+|---------------------
+*/
+
+// Halaman Menu (homepage)
 Route::get('/', [MenuController::class, 'index'])->name('menu');
 
-// 2. Halaman Rincian Pesanan
+// Rincian Pesanan (lihat keranjang sebelum bayar)
 Route::get('/RincianPesanan', function () {
-    return view('RincianPesanan'); // rincian-pesanan.blade.php
+    return view('RincianPesanan');
 })->name('RincianPesanan');
 
-// 3. Halaman Rincian Pembayaran
+// Rincian Pembayaran (halaman checkout) - GET
 Route::get('/RincianPembayaran', function () {
-    return view('RincianPembayaran'); // RincianPembayaran.blade.php
+    return view('RincianPembayaran');
 })->name('RincianPembayaran');
 
-// 3b. Proses submit Rincian Pembayaran -> SIMPAN ke DB
+// Rincian Pembayaran - POST -> simpan pesanan (guest atau user)
 Route::post('/RincianPembayaran', [PesananController::class, 'store'])
     ->name('pesanan.store');
-    
-// 4. Halaman Pembayaran Final (GET)
+
+// Halaman Pembayaran final / detail pesanan
+// (Pertimbangkan menambahkan middleware/cek akses jika perlu)
 Route::get('/Pembayaran/{pesanan}', [PesananController::class, 'show'])
     ->name('Pembayaran');
 
-// 5. Proses submit pembayaran (POST)
-//Route::post('/Pembayaran', function () {
-//    return view('Pembayaran');
-//})->name('Pembayaran.submit');
 
-// =========================
-// ROUTE SIDEBAR MENU
-// =========================
+/*
+|---------------------
+| Auth routes
+|---------------------
+*/
 
-// Halaman Login
-Route::get('/login', function () {
-    return view('auth.login'); // buat file ini
-})->name('login');
+// Register (form + action)
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
 
-// Halaman Register
-Route::get('/register', function () {
-    return view('auth.register'); // buat file ini
-})->name('register');
+// Login (form + action)
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
 
-// Halaman Promo
-Route::get('/promo', function () {
-    return view('promo.index'); // buat file ini
-})->name('promo.index');
+// Logout
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

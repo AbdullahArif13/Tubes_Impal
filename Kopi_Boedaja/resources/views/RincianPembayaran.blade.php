@@ -24,15 +24,13 @@
         {{-- cart dalam bentuk JSON, akan diisi dari localStorage via JS --}}
         <input type="hidden" name="cart" id="cart-input">
 
-        <!-- Tipe Pemesanan -->
-        <div class="bg-white rounded-lg border border-gray-300 px-4 sm:px-5 py-3 mb-6 flex items-center justify-between gap-4">
-            <span class="font-semibold text-gray-700 text-sm sm:text-base">Tipe Pemesanan</span>
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <span class="text-gray-700 text-xs sm:text-sm">Makan di tempat</span>
-                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-green-600 flex items-center justify-center">
-                    <div class="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-green-600"></div>
-                </div>
-            </div>
+        <!-- Delivery Type -->
+        <div class="bg-white rounded-lg border px-4 py-3 mb-6">
+            <p class="text-sm text-gray-500">Tipe Pemesanan</p>
+            <p id="orderTypeText" class="text-lg font-bold text-green-700">
+                <!-- akan diisi via JavaScript -->
+                -
+            </p>
         </div>
 
         <!-- Ringkasan (tanpa form identitas) -->
@@ -85,67 +83,133 @@
 
     </form>
 
-    <script>
-        // ambil keranjang dari localStorage
-        document.addEventListener('DOMContentLoaded', function () {
-            const cartInput          = document.getElementById('cart-input');
-            const subtotalText       = document.getElementById('subtotal-text');
-            const serviceChargeText  = document.getElementById('service-charge-text');
-            const discountText       = document.getElementById('discount-text');
-            const otherFeesText      = document.getElementById('other-fees-text');
-            const totalText          = document.getElementById('total-text');
-            const totalBottomText    = document.getElementById('total-bottom-text');
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ---------- BAGIAN: TAMPILAN TIPE PEMESANAN ----------
+    (function showOrderType() {
+        const orderTypeTextEl = document.getElementById('orderTypeText');
+        if (!orderTypeTextEl) return;
 
-            const serviceCharge = 1000;
-            const otherFees     = 2300;
-            const discount      = 0;
+        const orderType = localStorage.getItem('kopi_boedaja_order_type') || 'dine_in';
+        const mejaRaw   = localStorage.getItem('kopi_boedaja_meja');
 
-            function formatRupiah(number) {
-                return 'Rp' + (number || 0).toLocaleString('id-ID');
+        let text = '';
+        if (orderType === 'take_away') {
+            text = 'Dibawa Pulang';
+        } else {
+            if (mejaRaw) {
+                try {
+                    const data = JSON.parse(mejaRaw);
+                    // safe guard: pastikan ada lantai & meja
+                    const lantai = (data && data.lantai) ? data.lantai : null;
+                    const meja   = (data && data.meja) ? data.meja : null;
+                    if (lantai && meja) {
+                        text = `Makan di tempat — Lantai ${lantai}, Meja ${meja}`;
+                    } else {
+                        text = 'Makan di tempat';
+                    }
+                } catch (e) {
+                    text = 'Makan di tempat';
+                }
+            } else {
+                text = 'Makan di tempat';
             }
+        }
 
-            const rawCart = localStorage.getItem('cart') || '{}';
-            let cart;
+        orderTypeTextEl.textContent = text;
+    })();
 
+    // ---------- BAGIAN: RINCIAN PEMBAYARAN (CART) ----------
+    (function paymentSummary() {
+        const cartInput          = document.getElementById('cart-input'); // hidden input (optional)
+        const subtotalText       = document.getElementById('subtotal-text');
+        const serviceChargeText  = document.getElementById('service-charge-text');
+        const discountText       = document.getElementById('discount-text');
+        const otherFeesText      = document.getElementById('other-fees-text');
+        const totalText          = document.getElementById('total-text');
+        const totalBottomText    = document.getElementById('total-bottom-text');
+
+        // guard: jika elemen tidak ada, hentikan bagian ini
+        if (!subtotalText || !serviceChargeText || !discountText || !otherFeesText || !totalText || !totalBottomText) {
+            return;
+        }
+
+        const serviceCharge = 1000;
+        const otherFees     = 2300;
+        const discount      = 0;
+
+        function formatRupiah(number) {
+            return 'Rp' + (number || 0).toLocaleString('id-ID');
+        }
+
+        // AMAN: ambil isi localStorage tanpa default string yang dapat menutupi error
+        const rawCart = localStorage.getItem('cart'); // null jika tidak ada
+        let cart = {};
+        let items = [];
+
+        if (rawCart === null) {
+            // tidak ada cart di localStorage
+            cart = {};
+            items = [];
+        } else {
             try {
                 cart = JSON.parse(rawCart);
+                // safety: pastikan cart adalah object
+                if (!cart || typeof cart !== 'object') {
+                    cart = {};
+                    items = [];
+                } else {
+                    items = Object.values(cart);
+                }
             } catch (e) {
+                // JSON corrupt — jangan overwrite localStorage di sini; tampilkan kosong
                 cart = {};
+                items = [];
+                console.warn('Gagal parse cart dari localStorage:', e);
             }
+        }
 
-            const items = Object.values(cart);
-
-            // isi hidden input cart
-            cartInput.value = JSON.stringify(cart);
-
-            if (!items.length) {
-                const total = serviceCharge + otherFees - discount;
-                subtotalText.textContent    = formatRupiah(0);
-                serviceChargeText.textContent = formatRupiah(serviceCharge);
-                discountText.textContent    = formatRupiah(discount);
-                otherFeesText.textContent   = formatRupiah(otherFees);
-                totalText.textContent       = formatRupiah(total);
-                totalBottomText.textContent = formatRupiah(total);
-                return;
+        // Hanya isi hidden input jika cart ada isinya — mencegah overwrite dengan "{}" saat kosong.
+        if (cartInput) {
+            if (items.length) {
+                cartInput.value = JSON.stringify(cart);
+            } else {
+                // opsional: kosongkan hidden input (atau biarkan tetap apa adanya)
+                // cartInput.value = '';
             }
+        }
 
-            // hitung subtotal dari cart
-            let subtotal = 0;
-            items.forEach(item => {
-                const qty   = item.quantity || 0;
-                const price = item.price || 0;
-                subtotal += qty * price;
-            });
+        // jika cart kosong, tampilkan nilai dasar
+        if (!items.length) {
+            const total = serviceCharge + otherFees - discount;
+            subtotalText.textContent       = formatRupiah(0);
+            serviceChargeText.textContent  = formatRupiah(serviceCharge);
+            discountText.textContent       = formatRupiah(discount);
+            otherFeesText.textContent      = formatRupiah(otherFees);
+            totalText.textContent          = formatRupiah(total);
+            totalBottomText.textContent    = formatRupiah(total);
+            return;
+        }
 
-            const total = subtotal + serviceCharge + otherFees - discount;
-
-            subtotalText.textContent      = formatRupiah(subtotal);
-            serviceChargeText.textContent = formatRupiah(serviceCharge);
-            discountText.textContent      = formatRupiah(discount);
-            otherFeesText.textContent     = formatRupiah(otherFees);
-            totalText.textContent         = formatRupiah(total);
-            totalBottomText.textContent   = formatRupiah(total);
+        // hitung subtotal dari cart
+        let subtotal = 0;
+        items.forEach(item => {
+            const qty   = Number(item.quantity) || 0;
+            const price = Number(item.price) || 0;
+            subtotal += qty * price;
         });
-    </script>
+
+        const total = subtotal + serviceCharge + otherFees - discount;
+
+        subtotalText.textContent       = formatRupiah(subtotal);
+        serviceChargeText.textContent  = formatRupiah(serviceCharge);
+        discountText.textContent       = formatRupiah(discount);
+        otherFeesText.textContent      = formatRupiah(otherFees);
+        totalText.textContent          = formatRupiah(total);
+        totalBottomText.textContent    = formatRupiah(total);
+    })();
+});
+</script>
+
 </body>
 </html>
