@@ -32,15 +32,13 @@
 
     <div class="px-4 sm:px-6 lg:px-8 py-6 max-w-2xl mx-auto">
 
-        {{-- Tipe Pemesanan --}}
-        <div class="bg-white rounded-lg border border-gray-300 px-4 sm:px-5 py-3 mb-6 flex items-center justify-between gap-4">
-            <span class="font-semibold text-gray-700 text-sm sm:text-base">Tipe Pemesanan</span>
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <span class="text-gray-700 text-xs sm:text-sm">Makan di tempat</span>
-                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-green-600 flex items-center justify-center flex-shrink-0">
-                    <div class="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-green-600"></div>
-                </div>
-            </div>
+        <!-- Delivery Type -->
+        <div class="bg-white rounded-lg border px-4 py-3 mb-6">
+            <p class="text-sm text-gray-500">Tipe Pemesanan</p>
+            <p id="orderTypeText" class="text-lg font-bold text-green-700">
+                <!-- akan diisi via JavaScript -->
+                -
+            </p>
         </div>
 
         {{-- (Opsional) Info meja / nama pemesan --}}
@@ -125,6 +123,140 @@
             </a>
         </div>
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ----- 1) Isi teks tipe pemesanan -----
+    (function showOrderType() {
+        const orderTypeTextEl = document.getElementById('orderTypeText');
+        if (!orderTypeTextEl) return;
+
+        const orderType = localStorage.getItem('kopi_boedaja_order_type') || 'dine_in';
+        const mejaRaw   = localStorage.getItem('kopi_boedaja_meja');
+
+        let text = '';
+        if (orderType === 'take_away') {
+            text = 'Dibawa Pulang';
+        } else {
+            if (mejaRaw) {
+                try {
+                    const data = JSON.parse(mejaRaw);
+                    const lantai = data && (data.lantai ?? data.floor ?? data.level);
+                    const meja   = data && (data.meja ?? data.table ?? data.no);
+                    if (lantai && meja) {
+                        text = `Makan di tempat — Lantai ${lantai}, Meja ${meja}`;
+                    } else {
+                        text = 'Makan di tempat';
+                    }
+                } catch (e) {
+                    console.warn('Gagal parse kopi_boedaja_meja:', e);
+                    text = 'Makan di tempat';
+                }
+            } else {
+                text = 'Makan di tempat';
+            }
+        }
+
+        orderTypeTextEl.textContent = text;
+    })();
+
+    // ----- 2) Click-to-copy untuk nomor pesanan + toast -----
+    (function enableCopyOrderNumber() {
+        const orderNumberEl = document.querySelector('.break-all');
+        if (!orderNumberEl) return;
+
+        // buat area klik yang tidak mengubah layout
+        const wrapper = document.createElement('div');
+        wrapper.style.cursor = 'pointer';
+        wrapper.style.display = 'inline-block';
+        wrapper.style.width = '100%';
+        wrapper.style.textAlign = 'center';
+
+        // pindahkan node nomor ke wrapper (preserve styling)
+        orderNumberEl.parentNode.replaceChild(wrapper, orderNumberEl);
+        wrapper.appendChild(orderNumberEl);
+
+        // toast sederhana (reuse jika sudah ada)
+        function showToast(msg) {
+            const existing = document.getElementById('kb-toast');
+            if (existing) {
+                existing.remove();
+            }
+            const t = document.createElement('div');
+            t.id = 'kb-toast';
+            t.textContent = msg;
+            // styling
+            t.style.position = 'fixed';
+            t.style.right = '1rem';
+            t.style.bottom = '4.5rem';
+            t.style.zIndex = 9999;
+            t.style.padding = '10px 14px';
+            t.style.borderRadius = '12px';
+            t.style.background = 'rgba(0,0,0,0.82)';
+            t.style.color = 'white';
+            t.style.fontSize = '13px';
+            t.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)';
+            t.style.opacity = '0';
+            t.style.transition = 'opacity 160ms ease';
+            document.body.appendChild(t);
+            // fade in
+            requestAnimationFrame(() => { t.style.opacity = '1'; });
+            setTimeout(() => {
+                t.style.opacity = '0';
+                setTimeout(() => t.remove(), 220);
+            }, 1600);
+        }
+
+        // klik wrapper => copy teks
+        wrapper.addEventListener('click', async function () {
+            const text = orderNumberEl.textContent.trim();
+            if (!text) return;
+
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(text);
+                    showToast('Nomor pesanan disalin!');
+                } else {
+                    // fallback legacy
+                    const range = document.createRange();
+                    range.selectNodeContents(orderNumberEl);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    document.execCommand('copy');
+                    sel.removeAllRanges();
+                    showToast('Nomor pesanan disalin!');
+                }
+            } catch (err) {
+                console.warn('Gagal menyalin ke clipboard:', err);
+                // coba fallback manual sekali lagi
+                try {
+                    const range = document.createRange();
+                    range.selectNodeContents(orderNumberEl);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    document.execCommand('copy');
+                    sel.removeAllRanges();
+                    showToast('Nomor pesanan disalin!');
+                } catch (e) {
+                    showToast('Gagal menyalin');
+                }
+            }
+        });
+
+        // opsional: hint kecil saat hover (desktop)
+        wrapper.addEventListener('mouseenter', function () {
+            wrapper.title = 'Klik untuk menyalin nomor pesanan';
+        });
+    })();
+
+    // ----- catatan keamanan/safety -----
+    // Script ini hanya membaca dari localStorage; tidak menulis atau menghapus.
+});
+</script>
+
+
 
 </body>
 </html>
