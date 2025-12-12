@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'AdminKopi',
             'email' => 'admin@kopiboedaja.com',
+            'role' => 'admin',
             'password' => bcrypt('kopi'),
         ]);
     }

@@ -64,6 +64,9 @@ class MenuResource extends Resource
                 Tables\Columns\TextColumn::make('harga')
                 ->money('idr'),
 
+                Tables\Columns\ImageColumn::make('gambar_produk'),
+                
+
                 Tables\Columns\TextColumn::make('kategori'),
 
                 Tables\Columns\BooleanColumn::make('tersedia')

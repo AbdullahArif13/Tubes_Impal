@@ -79,6 +79,11 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $request->session()->regenerate();
 
+            $user = Auth::user();
+            if ($user->role === 'admin') {
+            return redirect('/admin'); // Filament admin panel
+            }
+
             return redirect()->intended('/')
                 ->with('success', 'Berhasil login!');
         }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('pesanans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pelanggan_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('pelanggan_id')->nullable()->constrained()->cascadeOnDelete();
             $table->unsignedInteger('total_harga');
             $table->string('status');
             $table->text('catatan')->nullable();
