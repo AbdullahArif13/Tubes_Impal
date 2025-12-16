@@ -67,29 +67,31 @@
           </a>
       @endauth
 
-      @if(session()->has('pelanggan_id'))
+      @auth
         <a href="{{ route('promo.index') }}"
-           class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+          class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
           Lihat Promo
         </a>
       @else
         <a href="{{ route('login') }}"
-           class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+          class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
           Lihat Promo
         </a>
-      @endif
+      @endauth
 
-      @if(session()->has('pelanggan_id'))
-        <a href="#"
-           class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+
+      @auth
+        <a href="{{ route('pesanan.riwayat') }}"
+          class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
           Riwayat Pesanan
         </a>
       @else
         <a href="{{ route('login') }}"
-           class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+          class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
           Riwayat Pesanan
         </a>
-      @endif
+      @endauth
+
 
           {{-- LOGOUT (HANYA MUNCUL SAAT LOGIN) --}}
       @auth
