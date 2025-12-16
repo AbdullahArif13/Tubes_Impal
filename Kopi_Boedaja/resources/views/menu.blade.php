@@ -53,10 +53,19 @@
 
     <!-- BODY SIDEBAR -->
      <div class="p-4 flex flex-col gap-3">
-      <a href="{{ route('login') }}"
-         class="w-full py-2 px-3 rounded-lg bg-white text-green-900 font-semibold text-left hover:bg-gray-100">
-        Masuk untuk info promo!
-      </a>
+      @auth
+      <div class="flex items-center gap-2">
+          <span class="text-green-200 text-sm">Halo,</span>
+          <span class="font-semibold text-white truncate">
+              {{ Auth::user()->name }}
+          </span>
+      </div>
+      @else
+          <a href="{{ route('login') }}"
+            class="w-full py-2 px-3 rounded-lg bg-white text-green-900 font-semibold text-left hover:bg-gray-100">
+              Masuk untuk info promo!
+          </a>
+      @endauth
 
       @if(session()->has('pelanggan_id'))
         <a href="{{ route('promo.index') }}"
@@ -81,6 +90,22 @@
           Riwayat Pesanan
         </a>
       @endif
+
+          {{-- LOGOUT (HANYA MUNCUL SAAT LOGIN) --}}
+      @auth
+       <div class="mt-6">
+          <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit"
+                class="w-full py-2 px-3 rounded-lg bg-white text-green-900
+                       hover:bg-gray-100 text-left text-sm">
+                Logout
+            </button>
+          </form>
+        </div>
+      @endauth
+
+
     </div>
   </div>
 

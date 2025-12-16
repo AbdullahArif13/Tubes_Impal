@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\PromoController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -61,3 +61,17 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+/*
+|---------------------
+| Feature routes
+|---------------------
+*/
+
+Route::middleware('auth')->group(function () {
+    Route::get('/promo', [PromoController::class, 'index'])
+        ->name('promo.index');
+
+    Route::get('/riwayat-pesanan', [PesananController::class, 'riwayat'])
+        ->name('pesanan.riwayat');
+});

@@ -19,6 +19,10 @@ class PesananResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationLabel = 'Pesanan';
+    protected static ?string $pluralLabel = 'Pesanan';
+    protected static ?string $modelLabel = 'Pesanan';
+
     public static function form(Form $form): Form
     {
         return $form

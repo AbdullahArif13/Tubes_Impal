@@ -78,6 +78,14 @@
         <a href="{{ route('register') }}" class="text-[#0F8A5F] font-semibold">Daftar</a>
       </p>
     </div>
+
+        <div class="text-center mt-4">
+        <a href="/admin/login"
+          class="text-sm text-gray-500 hover:text-green-700">
+            🔒 Login sebagai Admin
+        </a>
+    </div>
+
   </div>
 
   <script>

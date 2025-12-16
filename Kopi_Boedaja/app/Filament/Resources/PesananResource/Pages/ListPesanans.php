@@ -10,6 +10,8 @@ class ListPesanans extends ListRecords
 {
     protected static string $resource = PesananResource::class;
 
+    protected static ?string $title = 'Pesanan';
+
     protected function getHeaderActions(): array
     {
         return [
