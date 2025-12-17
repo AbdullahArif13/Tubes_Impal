@@ -220,6 +220,7 @@
         <div>
           <p class="text-blue-200 text-xs">Total</p>
           <p id="cart-total" class="text-lg font-bold">Rp0</p>
+          <p id="cart-total" class="text-lg font-bold">Rp0</p>
         </div>
       </div>
 
@@ -255,7 +256,7 @@
       document.getElementById('product-list').innerHTML = '<p class="text-gray-500">Tidak ada menu tersedia.</p>';
     }
 
-    let cart = {};
+    let cart = JSON.parse(localStorage.getItem('cart')) || {};
     let activeTab = "hot";
 
     function setTab(tab) {
