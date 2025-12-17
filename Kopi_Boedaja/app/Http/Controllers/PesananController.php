@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Pesanan;
 use App\Models\Detail_Pesanan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class PesananController extends Controller
 {
@@ -72,4 +74,18 @@ class PesananController extends Controller
             'pesanan' => $pesanan,
         ]);
     }
+
+    public function riwayat()
+    {
+        // user pasti login karena route pakai middleware auth
+        $user = Auth::user();
+
+        // ambil pesanan yang DIMILIKI user ini
+        $pesanans = Pesanan::where('pelanggan_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('riwayat', compact('pesanans'));
+    }
+
 }
