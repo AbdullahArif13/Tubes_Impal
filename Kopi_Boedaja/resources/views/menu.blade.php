@@ -222,7 +222,6 @@
         <div>
           <p class="text-blue-200 text-xs">Total</p>
           <p id="cart-total" class="text-lg font-bold">Rp0</p>
-          <p id="cart-total" class="text-lg font-bold">Rp0</p>
         </div>
       </div>
 

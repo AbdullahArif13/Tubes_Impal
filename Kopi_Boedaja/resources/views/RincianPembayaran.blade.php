@@ -65,6 +65,29 @@
             </div>
         </div>
 
+        <!-- ================= DISKON ================= -->
+        <div class="bg-white rounded-2xl p-5 sm:p-6 mb-6">
+
+        <h2 class="text-base sm:text-lg font-bold mb-3">Promo & Diskon</h2>
+
+        @auth
+            {{-- USER LOGIN --}}
+            <div id="discount-area" class="text-sm text-gray-600">
+            {{-- default, nanti diisi JS --}}
+            <p>Tidak ada diskon yang berlaku kali ini</p>
+            </div>
+        @else
+            {{-- BELUM LOGIN --}}
+            <div
+            onclick="openLoginPromoModal()"
+            class="cursor-pointer border border-dashed border-gray-300 rounded-lg p-4 text-center text-sm text-gray-600 hover:bg-gray-50">
+            🎁 Klik untuk lihat promo
+            </div>
+        @endauth
+
+        </div>
+
+
         <!-- Total + Button -->
         <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
             <div class="max-w-2xl mx-auto">
