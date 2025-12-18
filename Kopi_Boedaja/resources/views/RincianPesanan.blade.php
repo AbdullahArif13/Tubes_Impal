@@ -46,17 +46,33 @@
   </div>
 
   <!-- FOOTER -->
-  <div class="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-4">
-    <div class="max-w-4xl mx-auto">
-      <p class="text-sm text-gray-500">Total Item</p>
-      <p id="total-bottom-text" class="text-2xl font-bold">0 item</p>
+  <div id="checkout-footer"
+     class="fixed bottom-0 left-0 right-0 bg-blue-900 text-white py-3 px-4 border-t shadow-lg">
+  <div class="max-w-7xl mx-auto flex justify-between items-center gap-4">
 
-      <a href="{{ route('RincianPembayaran') }}"
-         class="block mt-3 bg-green-700 text-white text-center py-3 rounded-lg font-bold">
-        Lanjut Pembayaran
-      </a>
+    <div class="flex items-center gap-3 flex-1 min-w-0">
+      <div class="relative">
+        <i data-lucide="shopping-cart" class="w-8 h-8"></i>
+        <span id="cart-count"
+              class="absolute -top-2 -right-2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+          0
+        </span>
+      </div>
+
+      <div>
+        <p class="text-blue-200 text-xs">Total</p>
+        <p id="cart-total" class="text-lg font-bold">Rp0</p>
+      </div>
     </div>
+
+    <a href="{{ route('RincianPembayaran') }}"
+       class="bg-white text-blue-900 px-6 py-2 rounded-lg font-bold">
+      CHECK OUT
+    </a>
+
   </div>
+</div>
+
 
 </main>
 
@@ -135,15 +151,17 @@ const items = Object.values(cart);
 const itemsContainer = document.getElementById('items-container');
 const totalItemsText = document.getElementById('total-items-text');
 const totalBottomText = document.getElementById('total-bottom-text');
+const totalPriceText = document.getElementById('total-price-text');
 
 if (!items.length) {
   itemsContainer.innerHTML = '<p>Keranjang masih kosong.</p>';
 } else {
   let totalQty = 0;
+  let totalPrice = 0;
 
   itemsContainer.innerHTML = items.map(item => {
     totalQty += item.quantity;
-
+    totalPrice += item.price * item.quantity;
     const noteText = item.note
       ? Object.values(item.note).filter(Boolean).join(' • ')
       : 'Tambah catatan lainnya';
@@ -175,6 +193,7 @@ if (!items.length) {
 
   totalItemsText.textContent = `(${totalQty})`;
   totalBottomText.textContent = `${totalQty} item`;
+  totalPriceText.textContent = `Rp${totalPrice.toLocaleString('id-ID')}`;
 }
 
 /* ===== MODAL LOGIC ===== */
