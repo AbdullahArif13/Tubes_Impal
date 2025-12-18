@@ -150,8 +150,8 @@ const items = Object.values(cart);
 
 const itemsContainer = document.getElementById('items-container');
 const totalItemsText = document.getElementById('total-items-text');
-const totalBottomText = document.getElementById('total-bottom-text');
-const totalPriceText = document.getElementById('total-price-text');
+const cartCountEl = document.getElementById('cart-count');
+const cartTotalEl = document.getElementById('cart-total');
 
 if (!items.length) {
   itemsContainer.innerHTML = '<p>Keranjang masih kosong.</p>';
@@ -192,8 +192,8 @@ if (!items.length) {
   }).join('');
 
   totalItemsText.textContent = `(${totalQty})`;
-  totalBottomText.textContent = `${totalQty} item`;
-  totalPriceText.textContent = `Rp${totalPrice.toLocaleString('id-ID')}`;
+  cartCountEl.textContent = totalQty;
+  cartTotalEl.textContent = `Rp${totalPrice.toLocaleString('id-ID')}`;
 }
 
 /* ===== MODAL LOGIC ===== */
