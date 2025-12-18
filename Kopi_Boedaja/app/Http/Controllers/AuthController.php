@@ -48,7 +48,7 @@ class AuthController extends Controller
 
         // =============== OPSIONAL ===============
         // Auto login setelah register
-        Auth::login($user);
+        Auth::guard('web')->login($user);
         // ========================================
 
         return redirect('/')
@@ -82,7 +82,7 @@ class AuthController extends Controller
         ]);
 
         // Coba login
-        if (Auth::attempt($credentials, $request->has('remember'))) {
+        if (Auth::guard('web')->attempt($credentials, $request->has('remember'))) {
             $request->session()->regenerate();
 
             return redirect()->intended('/')
@@ -102,12 +102,12 @@ class AuthController extends Controller
     */
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login')
+        return redirect('/')
             ->with('success', 'Anda telah logout.');
     }
 }

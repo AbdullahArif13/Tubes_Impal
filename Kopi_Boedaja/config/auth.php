@@ -36,11 +36,17 @@ return [
     */
 
     'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
+    'web' => [ // pelanggan
+        'driver' => 'session',
+        'provider' => 'users',
     ],
+
+    'admin' => [ // admin filament
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
+],
+
 
     /*
     |--------------------------------------------------------------------------

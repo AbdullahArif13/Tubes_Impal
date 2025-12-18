@@ -68,7 +68,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 |---------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:web')->group(function () {
     Route::get('/promo', [PromoController::class, 'index'])
         ->name('promo.index');
 

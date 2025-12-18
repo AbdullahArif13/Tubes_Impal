@@ -3,104 +3,141 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PesananResource\Pages;
-use App\Filament\Resources\PesananResource\RelationManagers;
 use App\Models\Pesanan;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PesananResource extends Resource
 {
     protected static ?string $model = Pesanan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static ?string $navigationLabel = 'Pesanan';
     protected static ?string $pluralLabel = 'Pesanan';
     protected static ?string $modelLabel = 'Pesanan';
 
+    /**
+     * ======================
+     * FORM (DETAIL PESANAN)
+     * ======================
+     */
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
                 Forms\Components\Select::make('pelanggan_id')
                     ->relationship('pelanggan', 'name')
                     ->label('Pelanggan')
-                    ->disabled(), // pelanggan tidak bisa diubah
+                    ->disabled(),
 
                 Forms\Components\TextInput::make('total_harga')
-                    ->numeric()
                     ->label('Total Harga')
-                    ->disabled(), // total harga dihitung dari detail pesanan
+                    ->numeric()
+                    ->disabled(),
 
                 Forms\Components\Select::make('status')
+                    ->label('Status Pesanan')
                     ->options([
-                        'pending' => 'Pending',
-                        'diproses' => 'Diproses',
-                        'selesai' => 'Selesai',
+                        'pending'   => 'Pending',
+                        'diproses'  => 'Diproses',
+                        'selesai'   => 'Selesai',
                     ])
-                    ->label('Status')
                     ->required(),
             ]);
     }
 
+    /**
+     * ======================
+     * TABLE (DAFTAR PESANAN)
+     * ======================
+     */
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                //
-                Tables\Columns\TextColumn::make('id')->sortable(),
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('pelanggan.name')
                     ->label('Pelanggan')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('total_harga')
-                    ->label('Total')
+                    ->label('Total Harga')
                     ->money('IDR'),
 
                 Tables\Columns\BadgeColumn::make('status')
+                    ->label('Status')
                     ->colors([
                         'warning' => 'pending',
-                        'info' => 'diproses',
+                        'info'    => 'diproses',
                         'success' => 'selesai',
                     ]),
 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
                     ->label('Tanggal')
+                    ->dateTime()
                     ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Filter Status')
+                    ->options([
+                        'pending'   => 'Pending',
+                        'diproses'  => 'Diproses',
+                        'selesai'   => 'Selesai',
+                    ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Detail / Ubah Status')
+                    ->requiresConfirmation()
+                    ->modalHeading('Konfirmasi Perubahan Status')
+                    ->modalDescription('Apakah Anda yakin ingin mengubah status pesanan ini?'),
+
+                Tables\Actions\DeleteAction::make()
+                    ->label('Hapus Pesanan')
+                    ->requiresConfirmation(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->defaultSort('created_at', 'desc');
     }
 
+    /**
+     * ======================
+     * RELATION
+     * ======================
+     */
     public static function getRelations(): array
     {
         return [
-            //
-           
+            // bisa ditambah DetailPesananRelationManager
         ];
     }
 
+    /**
+     * ======================
+     * PAGES
+     * ======================
+     */
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListPesanans::route('/'),
-            'edit' => Pages\EditPesanan::route('/{record}/edit'),
+            'edit'  => Pages\EditPesanan::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * ======================
+     * DISABLE CREATE
+     * ======================
+     */
+    public static function canCreate(): bool
+    {
+        return false;
     }
 }

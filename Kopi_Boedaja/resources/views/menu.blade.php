@@ -67,30 +67,31 @@
           </a>
       @endauth
 
-      @auth
-        <a href="{{ route('promo.index') }}"
-          class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
-          Lihat Promo
-        </a>
+      @if(auth('web')->check())
+          <a href="{{ route('promo.index') }}"
+            class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+              Lihat Promo
+          </a>
       @else
-        <a href="{{ route('login') }}"
-          class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
-          Lihat Promo
-        </a>
-      @endauth
+          <a href="{{ route('login') }}"
+            class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+              Lihat Promo
+          </a>
+      @endif
 
 
-      @auth
-        <a href="{{ route('pesanan.riwayat') }}"
-          class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
-          Riwayat Pesanan
-        </a>
+
+      @if(auth('web')->check())
+          <a href="{{ route('pesanan.riwayat') }}"
+            class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+              Riwayat Pesanan
+          </a>
       @else
-        <a href="{{ route('login') }}"
-          class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
-          Riwayat Pesanan
-        </a>
-      @endauth
+          <a href="{{ route('login') }}"
+            class="w-full py-2 px-3 rounded-lg border border-green-700 font-semibold text-left hover:bg-green-800">
+              Riwayat Pesanan
+          </a>
+      @endif
 
 
           {{-- LOGOUT (HANYA MUNCUL SAAT LOGIN) --}}
