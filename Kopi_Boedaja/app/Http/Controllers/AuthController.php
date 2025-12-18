@@ -13,8 +13,11 @@ class AuthController extends Controller
     | REGISTER (FORM)
     |--------------------------------------------------------------------------
     */
-    public function showRegister()
+    public function showRegister(Request $request)
     {
+        if ($request->has('redirect')) {
+            session(['url.intended' => $request->redirect]);
+        }
         return view('auth.register');
     }
 
@@ -57,8 +60,11 @@ class AuthController extends Controller
     | LOGIN (FORM)
     |--------------------------------------------------------------------------
     */
-    public function showLogin()
+    public function showLogin(Request $request)
     {
+        if ($request->has('redirect')) {
+            session(['url.intended' => $request->redirect]);
+        }
         return view('auth.login');
     }
 

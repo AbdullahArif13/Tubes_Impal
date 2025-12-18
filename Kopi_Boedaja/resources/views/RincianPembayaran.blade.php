@@ -106,6 +106,35 @@
 
     </form>
 
+    <div id="loginPromoModal"
+        class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-sm mx-4 text-center">
+
+            <h3 class="font-bold text-lg mb-2">Anda belum login</h3>
+            <p class="text-sm text-gray-600 mb-6">
+            Login untuk mengakses promo
+            </p>
+
+            <div class="space-y-3">
+            <a href="{{ route('login', ['redirect' => url()->current()]) }}"
+                class="block bg-green-700 text-white py-2 rounded-lg font-semibold">
+                Login
+            </a>
+
+            <a href="{{ route('register', ['redirect' => url()->current()]) }}"
+                class="block text-sm text-blue-600 hover:underline">
+                Belum punya akun? Buat dulu!
+            </a>
+            </div>
+
+            <button onclick="closeLoginPromoModal()"
+                    class="mt-4 text-xs text-gray-500">
+            Tutup
+            </button>
+
+        </div>
+    </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // ---------- BAGIAN: TAMPILAN TIPE PEMESANAN ----------
@@ -232,6 +261,15 @@ document.addEventListener('DOMContentLoaded', function () {
         totalBottomText.textContent    = formatRupiah(total);
     })();
 });
+    function openLoginPromoModal() {
+    document.getElementById('loginPromoModal').classList.remove('hidden');
+    document.getElementById('loginPromoModal').classList.add('flex');
+    }
+
+    function closeLoginPromoModal() {
+    document.getElementById('loginPromoModal').classList.add('hidden');
+    document.getElementById('loginPromoModal').classList.remove('flex');
+    }
 </script>
 
 </body>
