@@ -277,8 +277,8 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.removeItem('cart');
         
         // 2. Opsi tambahan: Jika kamu ingin menghapus info meja/tipe pesanan juga, aktifkan ini:
-        // localStorage.removeItem('kopi_boedaja_order_type');
-        // localStorage.removeItem('kopi_boedaja_meja');
+        localStorage.removeItem('kopi_boedaja_order_type');
+        localStorage.removeItem('kopi_boedaja_meja');
 
         console.log('Keranjang telah dibersihkan, memproses pesanan...');
     });
