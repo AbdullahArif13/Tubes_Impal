@@ -6,7 +6,6 @@ use App\Models\Pesanan;
 use App\Models\Detail_Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Promosi;
 
 
 class PesananController extends Controller
@@ -37,65 +36,44 @@ class PesananController extends Controller
             $total += $jumlah * $harga;
         }
 
-        // 3. PROMO KHUSUS USER LOGIN
-        $diskon = 0;
-
-        if (Auth::check()) {
-            $promo = Promosi::where('aktif', true)
-                ->whereDate('tanggal_berlaku', '<=', now())
-                ->whereDate('tanggal_berakhir', '>=', now())
-                ->first();
-
-            if ($promo) {
-                if ($promo->tipe === 'percent') {
-                    $diskon = ($promo->nilai / 100) * $total;
-
-                    if ($promo->maks_potongan && $diskon > $promo->maks_potongan) {
-                        $diskon = $promo->maks_potongan;
-                    }
-                } elseif ($promo->tipe === 'fixed') {
-                    $diskon = $promo->nilai;
-                }
-
-                if ($diskon > $total) {
-                    $diskon = $total;
-                }
-            }
-        }
-
-        $totalSetelahDiskon = $total - $diskon;
-
-        // 4. simpan pesanan
+        // 3. simpan pesanan
         $pesanan = Pesanan::create([
-            'pelanggan_id' => null,
-            'total_harga'  => $totalSetelahDiskon,
+            'pelanggan_id' => $pelangganId, // boleh null (sudah di-migration)
+            'total_harga'  => $total,
             'status'       => 'pending',
-            'catatan'      => Auth::check() ? 'Promo digunakan' : null,
+            'catatan' => $request->input('catatan', null),
         ]);
 
+        // 4. simpan detail pesanan
+        foreach ($cart as $item) {
+            $jumlah = $item['quantity'] ?? 0;
+            $harga  = $item['price'] ?? 0;
+
+            if ($jumlah <= 0) {
+                continue;
+            }
+
+            Detail_Pesanan::create([
+                'pesanan_id' => $pesanan->id,
+                'menu_id'    => $item['id'],      // id menu dari DB
+                'jumlah'     => $jumlah,
+                'subtotal'   => $jumlah * $harga,
+            ]);
+        }
 
         // 5. redirect ke halaman Pembayaran (kode pesanan)
         return redirect()->route('Pembayaran', ['pesanan' => $pesanan->id]);
     }
 
-     public function show(Pesanan $pesanan)
+    public function show(Pesanan $pesanan)
     {
-        // load relasi detail + menu (pelanggan boleh null)
-        $pesanan->load(['details.menu', 'pelanggan']);
-
-        // subtotal asli (sebelum diskon)
-        $subtotal = $pesanan->details->sum('subtotal');
-
-        // diskon = selisih subtotal dengan total_harga
-        $diskon = max(0, $subtotal - $pesanan->total_harga);
+        // pelanggan boleh null, tapi detail & menu tetap diload
+        $pesanan->load(['pelanggan', 'details.menu']);
 
         return view('Pembayaran', [
-            'pesanan'  => $pesanan,
-            'subtotal' => $subtotal,
-            'diskon'   => $diskon,
+            'pesanan' => $pesanan,
         ]);
     }
-
 
     public function riwayat()
     {
