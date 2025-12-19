@@ -270,6 +270,18 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('loginPromoModal').classList.add('hidden');
     document.getElementById('loginPromoModal').classList.remove('flex');
     }
+
+    // Tambahkan ini di paling bawah script kamu
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // 1. Hapus data keranjang di browser
+        localStorage.removeItem('cart');
+        
+        // 2. Opsi tambahan: Jika kamu ingin menghapus info meja/tipe pesanan juga, aktifkan ini:
+        // localStorage.removeItem('kopi_boedaja_order_type');
+        // localStorage.removeItem('kopi_boedaja_meja');
+
+        console.log('Keranjang telah dibersihkan, memproses pesanan...');
+    });
 </script>
 
 </body>

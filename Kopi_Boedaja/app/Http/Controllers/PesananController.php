@@ -26,7 +26,7 @@ class PesananController extends Controller
         }
 
         // 1. untuk saat ini: guest checkout, tidak ada pelanggan
-        $pelangganId = null;
+        $pelangganId = Auth::check() ? Auth::id() : null;
 
         // 2. hitung total harga dari cart
         $total = 0;

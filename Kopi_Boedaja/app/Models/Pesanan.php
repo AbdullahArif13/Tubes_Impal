@@ -20,7 +20,7 @@ class Pesanan extends Model
 
     public function pelanggan()
     {
-        return $this->belongsTo(Pelanggan::class);
+        return $this->belongsTo(User::class, 'pelanggan_id');
     }
 
     public function details()

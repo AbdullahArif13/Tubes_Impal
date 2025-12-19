@@ -10,7 +10,6 @@
         <h1 class="text-2xl font-bold mb-4 text-center">Promo Kopi Boedaja</h1>
         <p class="text-center text-gray-500">
             Belum ada promo saat ini. 😄  
-            (Nanti bisa diisi list promo dalam bentuk card.)
         </p>
 
         <div class="mt-6 text-center">

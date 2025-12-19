@@ -41,20 +41,6 @@
             </p>
         </div>
 
-        {{-- (Opsional) Info meja / nama pemesan --}}
-        @if($pesanan->pelanggan ?? false)
-            <div class="bg-white rounded-lg border border-gray-300 px-4 sm:px-5 py-3 mb-6 flex flex-col gap-1 text-sm sm:text-base">
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Atas nama</span>
-                    <span class="font-semibold">{{ $pesanan->pelanggan->nama }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Nomor meja</span>
-                    <span class="font-semibold">{{ $pesanan->pelanggan->nomor_meja }}</span>
-                </div>
-            </div>
-        @endif
-
         {{-- Nomor Pesanan --}}
         <div class="mb-6">
             <h2 class="text-base sm:text-lg font-bold mb-4">Nomor Pesanan</h2>
