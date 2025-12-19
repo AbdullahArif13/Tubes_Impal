@@ -3,73 +3,67 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LaporanResource\Pages;
-use App\Filament\Resources\LaporanResource\RelationManagers;
-use App\Models\Laporan;
+use App\Models\Pesanan;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class LaporanResource extends Resource
 {
-    protected static ?string $model = Laporan::class;
+    // LAPORAN AMBIL DARI PESANAN
+    protected static ?string $model = Pesanan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                //
-            ]);
-    }
+    protected static ?string $navigationLabel = 'Laporan Penjualan';
+    protected static ?string $navigationIcon = 'heroicon-o-document-chart-bar';
 
     public static function table(Table $table): Table
     {
         return $table
+            // HANYA PESANAN SELESAI
+            ->modifyQueryUsing(
+                fn (Builder $query) => $query->where('status', 'selesai')
+            )
+
             ->columns([
-                //
-                 Tables\Columns\TextColumn::make('tanggal')
-                ->label('Tanggal')
-                ->date()
-                ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Tanggal')
+                    ->date()
+                    ->sortable(),
 
-                Tables\Columns\TextColumn::make('nama_menu')
-                    ->label('Nama Menu')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID Pesanan'),
 
-                Tables\Columns\TextColumn::make('jumlah')
-                    ->label('Jumlah'),
-
-                Tables\Columns\TextColumn::make('harga')
-                    ->label('Harga')
-                    ->money('IDR'),
-
-                Tables\Columns\TextColumn::make('total')
+                Tables\Columns\TextColumn::make('total_harga')
                     ->label('Total')
                     ->money('IDR'),
             ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
+            ->filters([
+                Filter::make('periode')
+                    ->form([
+                        DatePicker::make('from')->label('Dari Tanggal'),
+                        DatePicker::make('until')->label('Sampai Tanggal'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when(
+                                $data['from'] ?? null,
+                                fn ($q, $date) => $q->whereDate('created_at', '>=', $date)
+                            )
+                            ->when(
+                                $data['until'] ?? null,
+                                fn ($q, $date) => $q->whereDate('created_at', '<=', $date)
+                            );
+                    }),
+            ])
+
+            // LAPORAN = VIEW SAJA
+            ->actions([])
+            ->bulkActions([]);
     }
 
     public static function getPages(): array
@@ -77,5 +71,11 @@ class LaporanResource extends Resource
         return [
             'index' => Pages\ListLaporans::route('/'),
         ];
+    }
+
+    // TIDAK BISA CREATE / EDIT / DELETE
+    public static function canCreate(): bool
+    {
+        return false;
     }
 }

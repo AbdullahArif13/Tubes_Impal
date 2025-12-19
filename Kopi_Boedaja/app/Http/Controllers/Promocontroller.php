@@ -2,14 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Promosi;
+use Illuminate\Support\Facades\Auth;
 
 class PromoController extends Controller
 {
     public function index()
     {
-        $promos = Promosi::where('aktif', true)->get();
+        // hanya user login
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $promos = Promosi::where('aktif', true)
+            ->whereDate('tanggal_berlaku', '<=', now())
+            ->whereDate('tanggal_berakhir', '>=', now())
+            ->get();
 
         return view('promo.index', compact('promos'));
     }

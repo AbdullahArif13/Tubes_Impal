@@ -28,10 +28,10 @@ class PesananResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('pelanggan_id')
-                    ->relationship('pelanggan', 'name')
+                Forms\Components\TextInput::make('pelanggan_id')
                     ->label('Pelanggan')
-                    ->disabled(),
+                    ->disabled()
+                    ->formatStateUsing(fn ($state) => $state ?? 'Guest'),
 
                 Forms\Components\TextInput::make('total_harga')
                     ->label('Total Harga')
@@ -62,9 +62,9 @@ class PesananResource extends Resource
                     ->label('ID')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('pelanggan.name')
+                Tables\Columns\TextColumn::make('pelanggan_id')
                     ->label('Pelanggan')
-                    ->searchable(),
+                    ->formatStateUsing(fn ($state) => $state ?? 'Guest'),
 
                 Tables\Columns\TextColumn::make('total_harga')
                     ->label('Total Harga')
@@ -83,15 +83,6 @@ class PesananResource extends Resource
                     ->dateTime()
                     ->sortable(),
             ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('status')
-                    ->label('Filter Status')
-                    ->options([
-                        'pending'   => 'Pending',
-                        'diproses'  => 'Diproses',
-                        'selesai'   => 'Selesai',
-                    ]),
-            ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->label('Detail / Ubah Status')
@@ -106,17 +97,19 @@ class PesananResource extends Resource
             ->defaultSort('created_at', 'desc');
     }
 
+
     /**
      * ======================
-     * RELATION
+     * RELATIONS
      * ======================
      */
     public static function getRelations(): array
     {
         return [
-            // bisa ditambah DetailPesananRelationManager
+            \App\Filament\Resources\PesananResource\RelationManagers\DetailsRelationManager::class,
         ];
     }
+
 
     /**
      * ======================
