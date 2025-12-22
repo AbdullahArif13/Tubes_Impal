@@ -29,19 +29,22 @@ class PesananController extends Controller
         $pelangganId = Auth::check() ? Auth::id() : null;
 
         // 2. hitung total harga dari cart
-        $total = 0;
+       $subtotal = 0;
         foreach ($cart as $item) {
-            $jumlah = $item['quantity'] ?? 0;
-            $harga  = $item['price'] ?? 0;
-            $total += $jumlah * $harga;
+            $subtotal += ($item['quantity'] ?? 0) * ($item['price'] ?? 0);
         }
 
+        // Sesuaikan dengan angka di gambar kamu
+        $biayaTambahan = 1000; 
+        $biayaLainnya = 2300; 
+        $totalFinal = $subtotal + $biayaTambahan + $biayaLainnya;
+       
         // 3. simpan pesanan
         $pesanan = Pesanan::create([
-            'pelanggan_id' => $pelangganId, // boleh null (sudah di-migration)
-            'total_harga'  => $total,
+            'pelanggan_id' => $pelangganId,
+            'total_harga'   => $totalFinal, // Simpan total yang sudah include biaya
             'status'       => 'pending',
-            'catatan' => $request->input('catatan', null),
+            'catatan'      => $request->input('catatan', "Layanan: $biayaTambahan, Pajak: $biayaLainnya"),
         ]);
 
         // 4. simpan detail pesanan
@@ -69,9 +72,10 @@ class PesananController extends Controller
     {
         // pelanggan boleh null, tapi detail & menu tetap diload
         $pesanan->load(['pelanggan', 'details.menu']);
-
+        $allPromos = \App\Models\Promosi::where('aktif', true)->get();
         return view('Pembayaran', [
             'pesanan' => $pesanan,
+            'promos'=> $allPromos,
         ]);
     }
 

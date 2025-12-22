@@ -23,6 +23,9 @@
         $serviceCharge = 1000;
         $discount      = 0;
         $otherFees     = 2300;
+        $subtotal      = ($pesanan->total_harga ?? 0) - $serviceCharge - $otherFees;
+        
+        $discount      = 0; // Nanti bisa dinamis jika promo sudah diklik
 
         // nomor pesanan dari id pesanan
         $orderNumber = 'KBDJ' . str_pad($pesanan->id, 5, '0', STR_PAD_LEFT);
@@ -112,7 +115,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // ----- 1) Isi teks tipe pemesanan -----
+    // ---------- BAGIAN: TAMPILAN TIPE PEMESANAN ----------
     (function showOrderType() {
         const orderTypeTextEl = document.getElementById('orderTypeText');
         if (!orderTypeTextEl) return;
@@ -127,15 +130,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (mejaRaw) {
                 try {
                     const data = JSON.parse(mejaRaw);
-                    const lantai = data && (data.lantai ?? data.floor ?? data.level);
-                    const meja   = data && (data.meja ?? data.table ?? data.no);
+                    // safe guard: pastikan ada lantai & meja
+                    const lantai = (data && data.lantai) ? data.lantai : null;
+                    const meja   = (data && data.meja) ? data.meja : null;
                     if (lantai && meja) {
                         text = `Makan di tempat — Lantai ${lantai}, Meja ${meja}`;
                     } else {
                         text = 'Makan di tempat';
                     }
                 } catch (e) {
-                    console.warn('Gagal parse kopi_boedaja_meja:', e);
                     text = 'Makan di tempat';
                 }
             } else {

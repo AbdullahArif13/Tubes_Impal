@@ -66,25 +66,38 @@
         </div>
 
         <!-- ================= DISKON ================= -->
-        <div class="bg-white rounded-2xl p-5 sm:p-6 mb-6">
+        <div class="bg-white rounded-2xl p-5 sm:p-6 mb-6 border border-gray-100 shadow-sm">
+            <h2 class="text-base sm:text-lg font-bold mb-3">Promo & Diskon</h2>
 
-        <h2 class="text-base sm:text-lg font-bold mb-3">Promo & Diskon</h2>
-
-        @auth
-            {{-- USER LOGIN --}}
-            <div id="discount-area" class="text-sm text-gray-600">
-            {{-- default, nanti diisi JS --}}
-            <p>Tidak ada diskon yang berlaku kali ini</p>
-            </div>
-        @else
-            {{-- BELUM LOGIN --}}
-            <div
-            onclick="openLoginPromoModal()"
-            class="cursor-pointer border border-dashed border-gray-300 rounded-lg p-4 text-center text-sm text-gray-600 hover:bg-gray-50">
-            🎁 Klik untuk lihat promo
-            </div>
-        @endauth
-
+            @auth
+                {{-- USER LOGIN: Tampilkan daftar promo dari Database --}}
+                @if(isset($promos) && $promos->count() > 0)
+                    <div class="space-y-3">
+                        @foreach($promos as $promo)
+                            <div class="flex items-center justify-between p-3 border border-dashed border-teal-500 rounded-xl bg-teal-50">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xl">🎁</span>
+                                    <div>
+                                        <p class="text-sm font-bold text-teal-900">{{ $promo->nama_promosi }}</p>
+                                        <p class="text-xs text-teal-700">{{ $promo->deskripsi }}</p>
+                                    </div>
+                                </div>
+                                {{-- Tombol pakai ini sementara hanya hiasan atau bisa buat JS --}}
+                                <button type="button" class="text-xs bg-teal-600 text-white px-3 py-1 rounded-full font-bold hover:bg-teal-700 transition">
+                                    Pakai
+                                </button>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-sm text-gray-400 italic">Tidak ada diskon yang berlaku kali ini</p>
+                @endif
+            @else
+                {{-- BELUM LOGIN --}}
+                <div onclick="openLoginPromoModal()" class="cursor-pointer border border-dashed border-gray-300 rounded-lg p-4 text-center text-sm text-gray-600 hover:bg-gray-50">
+                    🎁 Klik untuk lihat promo (Harus Login)
+                </div>
+            @endauth
         </div>
 
 
@@ -277,8 +290,8 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.removeItem('cart');
         
         // 2. Opsi tambahan: Jika kamu ingin menghapus info meja/tipe pesanan juga, aktifkan ini:
-        localStorage.removeItem('kopi_boedaja_order_type');
-        localStorage.removeItem('kopi_boedaja_meja');
+        //localStorage.removeItem('kopi_boedaja_order_type');
+        //localStorage.removeItem('kopi_boedaja_meja');
 
         console.log('Keranjang telah dibersihkan, memproses pesanan...');
     });
