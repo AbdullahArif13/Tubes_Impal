@@ -10,6 +10,10 @@
 
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
 
@@ -152,8 +156,8 @@
         <span id="mejaLabel">Pilih Lantai & Nomor Meja</span>
       </button>
 
-      <div class="flex items-center justify-center gap-3 overflow-x-auto pb-2">
-        <button onclick="setTab('hot')" id="btn-hot" class="px-3 py-2 rounded-full font-semibold bg-gray-800 text-white">
+      <div class="flex items-center justify-center gap-3 overflow-x-auto pb-2">        
+        <button onclick="setTab('hot')" id="btn-hot" class="px-3 py-2 rounded-full font-semibold bg-white border text-gray-700">
           ☕ Hot Series
         </button>
 
@@ -259,79 +263,94 @@
     }
 
     let cart = JSON.parse(localStorage.getItem('cart')) || {};
-    let activeTab = "hot";
+    let activeTab = "all";
 
-    function setTab(tab) {
-      activeTab = tab;
+function setTab(tab) {
+  activeTab = tab;
+  
+  document.querySelectorAll("[id^=btn-]").forEach(btn => {
+    // Kembalikan semua ke desain putih
+    btn.classList.remove("bg-gray-800", "text-white");
+    btn.classList.add("bg-white", "text-gray-700", "border");
+  });
 
-      document.querySelectorAll("[id^=btn-]").forEach(btn => {
-        btn.classList.remove("bg-gray-800", "text-white");
-        btn.classList.add("bg-white", "text-gray-700", "border");
-      });
+  // Set tombol yang diklik jadi gelap/aktif
+  const activeBtn = document.querySelector(`#btn-${tab}`);
+  if (activeBtn) {
+    activeBtn.classList.remove("bg-white", "text-gray-700", "border");
+    activeBtn.classList.add("bg-gray-800", "text-white");
+  }
 
-      document.querySelector(`#btn-${tab}`).classList.remove("bg-white", "text-gray-700", "border");
-      document.querySelector(`#btn-${tab}`).classList.add("bg-gray-800", "text-white");
+  filterDisplay();
+}
+function loadProducts() {
+  const container = document.getElementById("product-list");
+  container.innerHTML = "";
 
-      loadProducts(); // reload berdasarkan tab
-    }
+  // Gambar SEMUA produk tanpa filter di sini
+  products.forEach(p => {
+    const qty = cart[p.id] ? cart[p.id].quantity : 0;
 
-    function loadProducts() {
-      const container = document.getElementById("product-list");
-      container.innerHTML = "";
-
-      // filter berdasarkan tab (kategori)
-      const filtered = products.filter(p => {
-        if (activeTab === 'hot') return p.kategori === 'hot';
-        if (activeTab === 'cold') return p.kategori === 'cold';
-        if (activeTab === 'small') return p.kategori === 'small_bites' || p.kategori === 'small-bites' || p.kategori === 'small';
-        return true;
-      });
-
-      // jika tidak ada produk di tab tersebut
-      if (filtered.length === 0) {
-        container.innerHTML = '<p class="text-gray-500">Tidak ada menu pada kategori ini.</p>';
-        return;
-      }
-
-      filtered.forEach(p => {
-        const qty = cart[p.id] ? cart[p.id].quantity : 0;
-
-        container.innerHTML += `
-          <div class="menu-card bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl flex flex-col"
-            data-name="${p.name.toLowerCase()}">
-            <div class="h-40 bg-gray-200">
-              <img src="${p.image}" class="w-full h-full object-cover" alt="${p.name}" />
-            </div>
-
-            <div class="p-4 flex flex-col flex-grow">
-              <h3 class="text-lg font-bold mb-2">${p.name}</h3>
-              <p class="text-lg font-bold text-green-700 mb-4">Rp${Number(p.price).toLocaleString('id-ID')}</p>
-
-              ${qty === 0 ? `
-                <button onclick="addToCart('${p.id}')" class="w-full border-2 border-green-700 text-green-700 py-2 rounded-full font-bold hover:bg-green-700 hover:text-white">
-                  Tambahkan
+    container.innerHTML += `
+      <div class="menu-card bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl flex flex-col"
+           data-name="${p.name.toLowerCase()}" 
+           data-kategori="${p.kategori}">
+        <div class="h-40 bg-gray-200">
+          <img src="${p.image}" class="w-full h-full object-cover" alt="${p.name}" />
+        </div>
+        <div class="p-4 flex flex-col flex-grow">
+          <h3 class="text-lg font-bold mb-2">${p.name}</h3>
+          <p class="text-lg font-bold text-green-700 mb-4">Rp${Number(p.price).toLocaleString('id-ID')}</p>
+          <div id="qty-ctrl-${p.id}">
+            ${qty === 0 ? `
+              <button onclick="addToCart('${p.id}')" class="w-full border-2 border-green-700 text-green-700 py-2 rounded-full font-bold hover:bg-green-700 hover:text-white">
+                Tambahkan
+              </button>
+            ` : `
+              <div class="flex items-center justify-center gap-3">
+                <button onclick="decrease('${p.id}')" class="w-10 h-10 border-2 border-gray-400 rounded-full flex items-center justify-center hover:bg-gray-400 hover:text-white">
+                  <i data-lucide="minus"></i>
                 </button>
-              ` : `
-                <div class="flex items-center justify-center gap-3">
-                  <button onclick="decrease('${p.id}')" class="w-10 h-10 border-2 border-gray-400 rounded-full flex items-center justify-center hover:bg-gray-400 hover:text-white">
-                    <i data-lucide="minus"></i>
-                  </button>
-
-                  <span class="text-lg font-bold">${qty}</span>
-
-                  <button onclick="increase('${p.id}')" class="w-10 h-10 border-2 border-gray-400 rounded-full flex items-center justify-center hover:bg-gray-400 hover:text-white">
-                    <i data-lucide="plus"></i>
-                  </button>
-                </div>
-              `}
-            </div>
+                <span class="text-lg font-bold">${qty}</span>
+                <button onclick="increase('${p.id}')" class="w-10 h-10 border-2 border-gray-400 rounded-full flex items-center justify-center hover:bg-gray-400 hover:text-white">
+                  <i data-lucide="plus"></i>
+                </button>
+              </div>
+            `}
           </div>
-        `;
-      });
+        </div>
+      </div>
+    `;
+  });
 
-      lucide.createIcons();
+  lucide.createIcons();
+  filterDisplay(); // Langsung atur tampilan setelah gambar
+}
+
+function filterDisplay() {
+  const keyword = document.getElementById("search-input").value.toLowerCase();
+  const cards = document.querySelectorAll(".menu-card");
+
+  cards.forEach(card => {
+    const name = card.dataset.name;
+    const kat = card.dataset.kategori;
+    
+    // Cek apakah kategori menu cocok dengan Tab yang dipilih
+    let matchTab = false;
+    if (activeTab === 'all') matchTab = true;
+    else if (activeTab === 'hot' && kat === 'hot') matchTab = true;
+    else if (activeTab === 'cold' && kat === 'cold') matchTab = true;
+    else if (activeTab === 'small' && (kat === 'small_bites' || kat === 'small-bites' || kat === 'small')) matchTab = true;
+
+    // LOGIKA SEARCH: Jika sedang mengetik, abaikan Tab (cari di semua kategori)
+    if (keyword.length > 0) {
+      card.classList.toggle("hidden", !name.includes(keyword));
+    } else {
+      // Jika tidak mengetik, tampilkan hanya yang sesuai Tab
+      card.classList.toggle("hidden", !matchTab);
     }
-
+  });
+}
     function addToCart(id) {
       const product = products.find(p => p.id === id);
       cart[id] = { ...product, quantity: 1 };
@@ -343,28 +362,56 @@
       updateCart();
     }
 
-    function decrease(id) {
-      cart[id].quantity--;
-      if (cart[id].quantity <= 0) delete cart[id];
-      updateCart();
+function increase(id) {
+    cart[id].quantity++;
+    updateCart(id); // Kirim ID produk yang diupdate
+}
+
+function decrease(id) {
+    cart[id].quantity--;
+    if (cart[id].quantity <= 0) delete cart[id];
+    updateCart(id); // Kirim ID produk yang diupdate
+}
+
+function updateCart(targetId = null) {
+    const totalItems = Object.values(cart).reduce((a, b) => a + b.quantity, 0);
+    const totalPrice = Object.values(cart).reduce((a, b) => a + (b.price * b.quantity), 0);
+
+    document.getElementById("cart-count").innerText = totalItems;
+    document.getElementById("cart-total").innerText = "Rp" + totalPrice.toLocaleString('id-ID');
+    document.getElementById("checkout-footer").style.display = totalItems > 0 ? "block" : "none";
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    // UPDATE SPESIFIK: Hanya bagian tombol produk yang diklik yang berubah
+    if (targetId) {
+        const ctrlContainer = document.getElementById(`qty-ctrl-${targetId}`);
+        if (ctrlContainer) {
+            const qty = cart[targetId] ? cart[targetId].quantity : 0;
+            if (qty === 0) {
+                ctrlContainer.innerHTML = `
+                    <button onclick="addToCart('${targetId}')" class="w-full border-2 border-green-700 text-green-700 py-2 rounded-full font-bold hover:bg-green-700 hover:text-white">
+                        Tambahkan
+                    </button>`;
+            } else {
+                ctrlContainer.innerHTML = `
+                    <div class="flex items-center justify-center gap-3">
+                        <button onclick="decrease('${targetId}')" class="w-10 h-10 border-2 border-gray-400 rounded-full flex items-center justify-center hover:bg-gray-400 hover:text-white">
+                            <i data-lucide="minus"></i>
+                        </button>
+                        <span class="text-lg font-bold">${qty}</span>
+                        <button onclick="increase('${targetId}')" class="w-10 h-10 border-2 border-gray-400 rounded-full flex items-center justify-center hover:bg-gray-400 hover:text-white">
+                            <i data-lucide="plus"></i>
+                        </button>
+                    </div>`;
+            }
+            lucide.createIcons(); // Refresh icon hanya untuk tombol baru
+        }
+    } else {
+        // Jika tidak ada targetId (misal load awal), baru panggil loadProducts
+        loadProducts();
     }
-
-    function updateCart() {
-      loadProducts();
-
-      const totalItems = Object.values(cart).reduce((a, b) => a + b.quantity, 0);
-      const totalPrice = Object.values(cart).reduce((a, b) => a + (b.price * b.quantity), 0);
-
-      document.getElementById("cart-count").innerText = totalItems;
-      document.getElementById("cart-total").innerText = "Rp" + totalPrice.toLocaleString('id-ID');
-
-      document.getElementById("checkout-footer").style.display = totalItems > 0 ? "block" : "none";
-
-      localStorage.setItem('cart', JSON.stringify(cart));
-    }
-
-    // load awal
-    loadProducts();
+}
 
     // === LOGIKA PILIH MEJA ===
     const mejaButton = document.getElementById("mejaButton");
@@ -550,15 +597,9 @@
       searchInput.focus();
     });
 
-    searchInput.addEventListener("input", function () {
-      const keyword = this.value.toLowerCase();
-      const cards = document.querySelectorAll(".menu-card");
+searchInput.addEventListener("input", filterDisplay);
 
-      cards.forEach(card => {
-        const name = card.dataset.name;
-        card.style.display = name.includes(keyword) ? "flex" : "none";
-      });
-    });
+loadProducts();
   </script>
 
   
