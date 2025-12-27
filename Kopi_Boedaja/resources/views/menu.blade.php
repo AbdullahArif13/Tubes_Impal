@@ -157,6 +157,10 @@
       </button>
 
       <div class="flex items-center justify-center gap-3 overflow-x-auto pb-2">        
+        <button onclick="setTab('all')" id="btn-all" class="px-3 py-2 rounded-full font-semibold bg-slate-800 text-white border">
+          ⭐ All menu
+        </button>
+
         <button onclick="setTab('hot')" id="btn-hot" class="px-3 py-2 rounded-full font-semibold bg-white border text-gray-700">
           ☕ Hot Series
         </button>
